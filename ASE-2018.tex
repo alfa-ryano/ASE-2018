@@ -170,22 +170,36 @@ model persistence, hybrid persistence, change-based persistence, state-based per
 
 \section{Introduction}
 \label{sec:introduction}
-Change-based model persistence \cite{DBLP:conf/models/YohannisKP17} comes with at least two main advantages: it provides support for (1) fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and (2) recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, the approach comes with the cost that we need to pay: ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the former by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. In this work, we augment our change-based model persistence with NeoEMF \cite{daniel2016neoemf} as the state-based representation. 
+Change-based model persistence \cite{DBLP:conf/models/YohannisKP17} comes with at least two main advantages: it provides support for (1) fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and (2) recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, the approach comes with cost: the ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the former by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. We investigate the impact of the hybrid model persistence on model loading and saving time, memory footprint on loading and saving a model, and storage space usage, and argue that hybrid model persistence is a fair trade-off for state-based persistence.
+
+ 
+The rest of the paper is structured as follows. Section \ref{sec:hybrid_persistence} introduces a running example and provides a brief introduction to CBP.
+Section \ref{sec:hybrid_persistence} presents the approach to speed up model loading and its supporting data structures. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
+
 
 \section{Hybrid Persistence}
 \label{sec:hybrid_persistence}
-Explain the current CBP/NeoEMF implementation and how only the latter is used for querying but changes are recorded to both.
+In this work, we augment Epsilon CBP \cite{DBLP:conf/models/YohannisKP17} with NeoEMF \cite{daniel2016neoemf}. The former is the change-based representation while the latter is the state-based representation. Changes made to a model are recorded into both representations: the former persists all the changes while the latter only persists the model's last state produced by the changes. However, only the state-based persistence is used for loading and querying the model. 
+
+Class diagram  
+
 
 
 
 
 \section{Evaluation}
 \label{sec:evaluation}
-- For evaluation, show the loading/saving/space overhead of CBP/NeoEMF
-vs. pure NeoEMF as well as the performance benefits in terms of model
-comparison and argue that the former is a fair trade-off for the
-latter (I suspect that state-based comparison will explode
-sufficiently large models)
+For evaluation, show the loading/saving/space overhead of CBP/NeoEMF vs. pure NeoEMF as well as the performance benefits in terms of model comparison and argue that the former is a fair trade-off for the latter (I suspect that state-based comparison will explode sufficiently large models)
+
+We developed the proposed efficient loading approach on top of the original CBP implementation\footnote{The prototype, tests, and data used in the evaluation are available under \url{https://github.com/epsilonlabs/emf-cbp} and \url{https://goo.gl/1zUBQC} for reproducibility} from \cite{DBLP:conf/models/YohannisKP17} and evaluated our approach's model loading performance, as well as its memory footprint and its impact on the time required to save changes made to CBP models. The evaluation was performed on Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-6500U CPU@2.50GHz 2.59GHz, 12GB RAM, and the Java\textsuperscript{TM} SE Runtime Environment (build 1.8.0\textunderscore162-b12).
+
+Given that CBP is a very recent contribution and we are not aware of any existing datasets containing real-world models expressed in a change-based format, we have used synthetic change-based models for the evaluation of our experiments. The synthetic models were derived from real-world cases: the BPMN2 \cite{eclipse2017bpmn2,eclipse2018bpmn2git} and Epsilon \cite{eclipse2017epsilon,eclipse2018epsilongit} software projects, and the United States article \cite{wikipedia2018us} on Wikipedia (the article is further referred as Wikipedia). For the first two projects, for each version of the cases, we used MoDisco \cite{DBLP:journals/infsof/BruneliereCDM14} to generate a UML2 \cite{eclipse2017uml2} model that reflects its source code. For the Wikipedia article, a model that conforms to the Modisco XML metamodel \cite{eclipse2018modiscoxml} was generated. Since these cases have many versions -- represented by commits/revisions, different models of the versions can be generated, and to some degree, they reflect the time-ordered changes of the cases. The synthetic change-based model for each case was derived by comparing an initially-empty running model to different versions of the case's models sequentially. All identified differences were then reconciled by performing a unidirectional merging to the running model. All changes made to the running model during the merging process were captured and persisted into a CBP file. EMF Compare was used \cite{eclipse2017compare} to perform the comparison and merging.
+
+Using the synthetic models, we performed performance evaluation on loading time, saving time, and memory footprint for both loading and saving. To compare the loading time, we ran the optimised and original (baseline) CBP algorithms to reconstruct the current state of each of the three models (the results are shown in Figure \ref{fig:loadtime}). As discussed in Section \ref{sec:loading_time_optimisation}, optimised CBP also does extra work when saving the changes to a model, in order to save time (relative to original CBP) when loading a model. To analyse the performance effect of optimisation activities, we, therefore, compared the overall time required to save a new version of the models described above, after one single change has been made (The results are shown in Figure \ref{fig:savetime}). We also compare the memory footprints for both loading and saving since the optimised CBP approach also requires the maintenance of an additional in-memory data structure that keeps track of element and feature editing histories (see Figure \ref{fig:loadmemory} and \ref{fig:savememory} for the results). 
+
+For each combination of dimensions (loading time, saving time, loading memory footprint, saving memory footprint),  persistence types (original CBP, optimised CBP, and XMI), and cases (BPMN2, Epsilon, and Wikipedia), we performed measurement 22 times. The results of the measurement enabled us to perform the Welch's t-test \cite{welch1947ttest} to find the significance of the comparisons for each case. We used a significance level of 5\%. If t-test' $p$-$value$ $<$ 0.05, we rejected the null hypothesis -- the $means$ of the compared persistence types are equal ($H_0$) -- and accepted the alternative hypothesis -- the $means$ of the compared persistence types are not equal ($H_1$).
+
+For loading and saving time, we measured the delta time required to complete the loading and saving. For memory footprint, we measured the delta of memory used before and after loading and saving completes. The results are presented below.
 
 \subsection{Model Loading Time}
 \label{sec:model_loading_time}
@@ -206,8 +220,8 @@ sufficiently large models)
 \label{sec:discussion}
 
 
-\section{Literature Review}
-\label{sec:literature_review}
+\section{Related Work}
+\label{sec:related_work}
  There are several non-XMI approaches to state-based model persistence, using relational or NoSQL databases. For example, EMF Teneo\,\cite{eclipse2017teneo} persists EMF models in relational databases, while Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} persist models in document and graph databases, respectively.  None of these approaches provides built-in support for versioning and models are eventually stored in binary files/folders which are known to be a poor fit for text-oriented version control systems like Git and SVN. Connected Data Objects (CDO) \cite{eclipse2017cdo}, provides support for database-backed model persistence as well as collaboration facilities, but its adoption necessitates the use of a separate version control system in the software development process (e.g. a Git repository for code and a CDO repository for models), which introduces fragmentation and administration challenges \cite{barmpis2014evaluation}. Similar challenges arise in relation to other model-specific version control systems such as EMFStore\,\cite{koegel2010emfstore}.
 
 \section{Conclusions and Future Work}
