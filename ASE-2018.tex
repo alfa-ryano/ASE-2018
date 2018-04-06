@@ -171,17 +171,28 @@ model persistence, hybrid persistence, change-based persistence, state-based per
 \section{Introduction}
 \label{sec:introduction}
 Change-based model persistence \cite{DBLP:conf/models/YohannisKP17} comes with at least two main advantages: it provides support for (1) fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and (2) recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, the approach comes with cost: the ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the former by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. We investigate the impact of the hybrid model persistence on model loading and saving time, memory footprint on loading and saving a model, and storage space usage, and argue that hybrid model persistence is a fair trade-off for state-based persistence.
-
  
-The rest of the paper is structured as follows. Section \ref{sec:hybrid_persistence} introduces a running example and provides a brief introduction to CBP.
-Section \ref{sec:hybrid_persistence} presents the approach to speed up model loading and its supporting data structures. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
+The rest of the paper is structured as follows. Section \ref{sec:change_based_model_persistence} introduces a running example and provides a brief introduction to change-based model persistence.
+Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model persistence. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
 
 
-\section{Hybrid Persistence}
-\label{sec:hybrid_persistence}
-In this work, we augment Epsilon CBP \cite{DBLP:conf/models/YohannisKP17} with NeoEMF \cite{daniel2016neoemf}. The former is the change-based representation while the latter is the state-based representation. Changes made to a model are recorded into both representations: the former persists all the changes while the latter only persists the model's last state produced by the changes. However, only the state-based persistence is used for loading and querying the model. 
+\section{Change-based Model Persistence}
+\label{sec:change_based_model_persistence}
 
-Class diagram  
+\section{Hybrid Model Persistence}
+\label{sec:hybrid_model_persistence}
+Hybrid model persistence is essentially combining two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified, the occurred changes are recorded into both representations of persistence. The former persists all the changes to keep the model's history, while the latter is used to maintain the last state of the model produced by the changes. In terms of loading, the model is directly loaded from the state-based representation. Thus, replaying all the changes from its change-based representation -- which is time consuming -- to get the last state of the model can be avoided.
+
+These ideas are then translated into an inplementation that conforms to object-oriented metamodelling architectures such as MOF and EMF. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with an implementation of state-based persistence, the NeoEMF \cite{daniel2016neoemf}. The design of our implementation follows the class diagram presented in Fig. \ref{fig:loadtime}. 
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/class_diagram}
+    \caption{The class diagram of hybrid model persistence.}
+    \label{fig:loadtime}
+\end{figure}
+
+The Epsilon CBP provides a $ChangeEventAdapter$ class, an derived $EContentAdapter$ adapter class that collects changes made to a model in the form a list of events, $changeEvents$. The events occur when the model is modified and are recorded by the class. Based on this class, we derives another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter classes for NeoEMF (an adapter class for EMF's default XMI resource also has been developed, but it is out of the scope of this paper). This class has the constructor $HybridNeoEMFChangeEventAdapter$ that receives $HybridNeoEMFResourceImpl$ class as its parameter so that 
++ notifyChanged(Notification)  
 
 
 
