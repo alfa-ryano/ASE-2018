@@ -103,10 +103,10 @@
       <data key="d4"/>
       <data key="d6">
         <y:UMLClassNode>
-          <y:Geometry height="75.0" width="386.0" x="258.0" y="247.0"/>
+          <y:Geometry height="64.0" width="252.0" x="30.0" y="233.0"/>
           <y:Fill color="#FFFFFF" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="229.36083984375" x="78.319580078125" y="3.0">HybridNeoEMFChangeEventAdapter<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="229.36083984375" x="11.319580078125" y="3.0">HybridNeoEMFChangeEventAdapter<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -115,8 +115,7 @@
           </y:NodeLabel>
           <y:UML clipContent="true" constraint="" omitDetails="false" stereotype="" use3DEffect="false">
             <y:AttributeLabel/>
-            <y:MethodLabel>+ HybridNeoEMFChangeEventAdapter(HybridNeoEMFResourceImpl)
-+ notifyChanged(Notification)</y:MethodLabel>
+            <y:MethodLabel>+ notifyChanged(Notification)</y:MethodLabel>
           </y:UML>
         </y:UMLClassNode>
       </data>
@@ -198,9 +197,7 @@
     <edge id="e3" source="n4" target="n2">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-86.5" sy="3.3192000000000235" tx="-54.94610307169907" ty="32.02788989998082">
-            <y:Point x="88.55389692830093" y="287.8192"/>
-          </y:Path>
+          <y:Path sx="-67.44610307169907" sy="10.0" tx="-54.94610307169907" ty="32.02788989998082"/>
           <y:LineStyle color="#000000" type="line" width="1.0"/>
           <y:Arrows source="none" target="white_delta"/>
           <y:BendStyle smoothed="false"/>
@@ -246,7 +243,9 @@
     <edge id="e6" source="n6" target="n4">
       <data key="d10">
         <y:PolyLineEdge>
-          <y:Path sx="-12.0" sy="5.5" tx="-6.0" ty="10.319200000000023"/>
+          <y:Path sx="86.5" sy="-4.0" tx="-3.917098445595856" ty="8.805717333333353">
+            <y:Point x="543.5" y="273.80571733333335"/>
+          </y:Path>
           <y:LineStyle color="#000000" type="dashed" width="1.0"/>
           <y:Arrows source="plain" target="none"/>
           <y:BendStyle smoothed="false"/>
