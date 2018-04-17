@@ -87,6 +87,21 @@
 \lstdefinestyle{interfaces}{
  		float=t
 }
+\lstdefinestyle{xmi}{
+    basicstyle=\ttfamily\scriptsize,
+    emph={
+        DUMMY    
+    }
+}
+\lstdefinestyle{eol}{
+    basicstyle=\ttfamily\scriptsize,
+    emph={
+        var, new, for, in, create, set, of, with, 
+        unset, to, add, remove, delete, register, move,
+        from, position, from, move-within, session, \.
+    }
+}
+
 \lstdefinestyle{java}{
     basicstyle=\ttfamily\scriptsize,
     emph={
@@ -188,8 +203,44 @@ The rest of the paper is structured as follows. Section \ref{sec:change_based_mo
 
 \section{Change-based Model Persistence}
 \label{sec:change_based_model_persistence}
+To explain the concept of change-based model persistence, we have two versions of a UML2 \cite{eclipse2017uml2} model persisted in state-based in an XMI format: the first one is the initial version when the model is created (List. \ref{lst:xmimodel1}), and the second one is when the model has been modified (Fig. \ref{lst:xmimodel2}). In the first session when creating the first version of the model, a package is created and its name is set to ``Package X''. Two classes also created and their names are set to ``Class A'' and ``Class B''. Both classes are then added to the package. The model is then saved and produces a state-based model as presented in List. \ref{lst:xmimodel1}. In the second session, the model is modified by renaming the ``Class `B'' to ``Class C'' and removing the ``Class A'' class from its package and deleting it entirely from the model. After that, the model is saved again to produce the second version of the model as presented in List. \ref{lst:xmimodel2}.
 
+\begin{lstlisting}[style=xmi,caption={The first version of the UML2 example model in XMI format when initially created.},label=lst:xmimodel1]
+<?xml version="1.0" encoding="ASCII"?>
+<uml:Package xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="1" name="Package X">
+    <packagedElement xsi:type="uml:Class" xmi:id="2" name="Class A"/>
+    <packagedElement xsi:type="uml:Class" xmi:id="3" name="Class B"/>
+</uml:Package>
+\end{lstlisting}
 
+\begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model in XMI format after ``Class A'' is deleted.},label=lst:xmimodel2]
+<?xml version="1.0" encoding="ASCII"?>
+<uml:Package xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="1" name="Package X">
+    <packagedElement xsi:type="uml:Class" xmi:id="3" name="Class C"/>
+</uml:Package>
+\end{lstlisting}
+
+Change-based model persistence, instead of saving the states of a model, save the changes made to a model in the form of a list of events. These events is collected in memory and will be appended into a change-based file when the model is saved (or decided to be persisted). The series of changes made to the example model in both sessions can be seen in a generic-formatted, change-based persistence presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted events have to be replayed again.
+
+\begin{lstlisting}[style=eol,caption={The generic change-based persistence of both versions in List. \ref{lst:xmimodel1} and \ref{lst:xmimodel2}.},label=lst:cbpmodel]
+session 1
+create p1 of Package
+set p1.name to "Package X"  
+create c1 of Class
+set c1.name to "Class A"
+create c2 of Class
+set c2.name to "Class B"
+add c1 to p1.packagedElement   
+add c2 to p1.packagedElement
+session 2
+set c2.name to "Class C"
+remove c1 from p1.children   
+delete c1
+\end{lstlisting}
+
+While finding the differences between the first version and the second version of the model can be very quick since the the size of the model is very small, the task can be very exhaustive for large models. Detecting changes can be very time consuming since comparison has to be made element to element, element by element to identify the differences between two versions of a model. In change-based persistence, changed elements between a version and its previous versions are already contained in the persistence. Thus, it provides support for faster model comparison and change detection.
+
+Change-based persistence can also provide support for rapid incremental model management. Suppose that every class in the ``Package A'' package has an HTML file for documentation. The HTML files are generated automatically through model-to-text transformation. Identifying that ``Class B'' is the only class that is renamed in the last session enables the model-to-text transformation to only generate the HTML file specific to that class, not all HTML files for all classes. Also the HTML file for ``Class A'' is deleted since it is not contained any more in the model.
 
 \section{Hybrid Model Persistence}
 \label{sec:hybrid_model_persistence}
@@ -365,7 +416,7 @@ For the Epsilon project, we have successfully generated its CBP from version 1 u
 
 \begin{table} [ht]
     \centering
-    \caption{Space Usage for the Wikipedia's US article. The CBP were generated from version 1 to 10187 of the article.}
+    \caption{Space Usage for the Wikipedia's US article. The CBP were generated from version 1 to 10,187 of the article.}
     \label{table:space_usage_wikipedia}
     \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
         \hline 
