@@ -52,5 +52,6 @@ Temporary Items
 *.dvi
 *.log
 *.out
-*.pdf
 *.synctex.gz
+IEEEtran_HOWTO.pdf
+ASE-2018.pdf
