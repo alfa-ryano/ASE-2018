@@ -161,12 +161,12 @@ Email: \IEEEauthorrefmark{1}ary506@york.ac.uk, \IEEEauthorrefmark{2}horacio\_hoy
 % in the abstract
 \begin{abstract}
 \label{abstract}
-Lorem ipsum dolor sit amet consectetur adipiscing elit malesuada sollicitudin, penatibus ultricies primis accumsan volutpat id aliquet orci, netus congue tempus ligula proin ornare laoreet pharetra. Fringilla nibh felis odio duis tincidunt eget ultricies tellus, eros molestie phasellus lacinia accumsan mus gravida conubia, purus at posuere tristique porttitor volutpat sociis. Varius duis facilisi condimentum rhoncus nascetur velit cum nostra, cubilia ridiculus a himenaeos massa sem inceptos, dignissim in nibh elementum interdum nisi ligula.
+Change-based model persistence comes with support for fast model comparison, rapid incremental model management, and model analytics. On the other hand, state-based model persistence has been matured to the level where it can process big-size models. In this work, we integrate both persistence into one single approach, a hybrid model persistence, in order to gain the benefits of both. In this  paper, we present the design of our hybrid model persistence and report its impact on time and memory footprint for model loading and saving, storage space usage, and detecting changes of versions of the same model. We conclude that hybrid model persistence can provide considerable benefits on model loading time and change detection with an acceptable trade-off on memory footprint and storage space usage.
 \end{abstract}
 %
 % no keywords
 \begin{IEEEkeywords} 
-model persistence, hybrid persistence, change-based persistence, state-based persistence
+model persistence, hybrid model persistence, change-based model persistence, state-based model persistence, model comparison
 \end{IEEEkeywords}
 
 % For peer review papers, you can put extra information on the cover
@@ -179,16 +179,17 @@ model persistence, hybrid persistence, change-based persistence, state-based per
 % creates the second title. It will be ignored for other modes.
 \IEEEpeerreviewmaketitle
 
+\vspace{-5pt}
 \section{Introduction}
 \label{sec:introduction}
-Change-based model persistence \cite{DBLP:conf/models/YohannisKP17} comes with at least two main advantages: it provides support for (1) fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and (2) recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, the approach comes with cost: the ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the former by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. We investigate the impact of the hybrid model persistence on model loading and saving time, memory footprint on loading and saving a model, and storage space usage, and argue that hybrid model persistence is a fair trade-off for state-based persistence.
+Change-based model persistence \cite{DBLP:conf/models/YohannisKP17} comes advantages: it provides support for fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, the approach comes with cost: the ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the former by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. We investigate the impact of the hybrid model persistence on model loading and saving time, memory footprint on loading and saving a model, and storage space usage, and argue that hybrid model persistence is a fair trade-off for state-based persistence.
  
-The rest of the paper is structured as follows. Section \ref{sec:change_based_model_persistence} introduces a running example and provides a brief introduction to change-based model persistence.
-Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model persistence. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
-
+The rest of the paper is structured as follows. Section \ref{sec:change_based_model_persistence} introduces the concept of change-based model persistence. Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model persistence. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
 
 \section{Change-based Model Persistence}
 \label{sec:change_based_model_persistence}
+
+
 
 \section{Hybrid Model Persistence}
 \label{sec:hybrid_model_persistence}
@@ -281,7 +282,7 @@ In this section, we compare hybrid model persistence (Epsilon CBP and NeoEMF or 
 \label{sec:evaluation_method}
 We developed the prototype of the proposed hybrid model persistence approach\footnote{The prototype, tests, and data used in the evaluation are available under \url{https://github.com/epsilonlabs/emf-cbp} and \url{https://goo.gl/1zUBQC}.}. The evaluation was performed on Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-6500U CPU@2.50GHz 2.59GHz, 12GB RAM, and the Java\textsuperscript{TM} SE Runtime Environment (build 1.8.0\textunderscore162-b12).
 
-For the evaluation, we used synthetic hybrid models derived from a real-world project, the Epsilon \cite{eclipse2017epsilon,eclipse2018epsilongit}. For state-based representation of the models, we used MoDisco \cite{DBLP:journals/infsof/BruneliereCDM14} to generate XMI-based UML2 \cite{eclipse2017uml2} models that reflect the source code of the project and then imported the generated models into NeoEMF. While obtaining the state-based part is trivial, obtaining its change-based part that reflects the changes of a real-world project was not straightforward. The change-based part was derived from the diffs identified from the subsequent versions of the project committed on its Git repository. Since the project have many committed versions, different models can be generated, and to some degree, they reflect the time-ordered changes of the cases. The change-based representation was derived by comparing an initially-empty running model to the generated models sequentially, version-by-version. All identified differences were then reconciled by performing a unidirectional merging to the running model. All changes made to the running model during the merging process were captured and persisted into a CBP file. EMF Compare was used \cite{eclipse2017compare} to perform the comparison and merging.
+For the evaluation, we used synthetic hybrid models derived from a real-world project, the Epsilon \cite{eclipse2017epsilon,eclipse2018epsilongit}. For state-based representation of the models, we used MoDisco \cite{DBLP:journals/infsof/BruneliereCDM14} to generate XMI-based UML2 \cite{eclipse2017uml2} models that reflect the source code of the project and then imported the generated models into NeoEMF. While obtaining the state-based persistence of a model is trivial, obtaining its change-based persistence that reflects the changes of a real-world project was not straightforward. The change-based persistence (CBP) was derived from the diffs identified from the subsequent versions of the project committed on its Git repository. Since the project have many committed versions, different models can be generated, and to some degree, they reflect the time-ordered changes of the cases. The change-based representation was derived by comparing an initially-empty running model to the generated models sequentially, version-by-version. All identified differences were then reconciled by performing a unidirectional merging to the running model. All changes made to the running model during the merging process were captured and persisted into a CBP file. EMF Compare was used \cite{eclipse2017compare} to perform the comparison and merging. Not all versions have been converted to a CBP since the comparison was time consuming.  
 
 Using the models, we performed performance evaluation on loading time, saving time, and memory footprint for both loading and saving. We compared the performance of the hybrid approach against state-based-only approach. For loading and saving time, we measured the delta time required to complete the loading and saving. For memory footprint, we measured the delta of memory used before and after loading and saving completes. Specifically for saving, we measured the time and memory footprint required to save a new version of a model, after one single change has been made to the model. We also measured the impact of using the hybrid approach on the execution time of a model comparison, specifically for identifying differences between a model and its preceding versions. The hybrid approach was compared to model-to-model comparison using EMF Compare on their execution time.
 
@@ -289,7 +290,6 @@ We performed measurement 22 times for each dimension measured. The results of th
 
 \subsection{Loading Time and Memory Footprint}
 \label{sec:model_loading_time}
-
 
 \begin{figure}[ht]
         \includegraphics[width=\linewidth]{images/load_time_epsilon}
@@ -304,6 +304,9 @@ We performed measurement 22 times for each dimension measured. The results of th
 \label{fig:load_memory_epsilon}
 \end{figure}
 
+In this section, we present the results our evaluation on the time (Fig. \ref{fig:load_time_epsilon}) and memory footprint (Fig. \ref{fig:load_memory_epsilon}) for the hybrid model persistence to load a model. The model used for testing is the UML2 model of the Epsilon project that consists of 88,020 elements (the model is derived from the committed version number 940 from its Git repository). The results shows that the average loading time of Hybrid NeoEMF ($mean$ = 0.292, $sd$ = 0.061 seconds) is slightly slower than NeoEMF ($mean$ = 0.279, $sd$ = 0.023 seconds) but insignificant ($t$ = -0.97, $df$ = 26.94, $p$-value = 0.34). The slowdown is more significant ($t$ = -29.37, $df$ = 27.38, $p$-value $<$ 0.05) on Hybrid Hybrid XMI ($mean$ = 0.873, $sd$ = 0.038 seconds) vs. XMI ($mean$ = 0.616, $sd$ = 0.015 seconds) but still in the order of less than 0.3 seconds.  
+
+For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 39, $sd$ = 0.9 MBs) uses more memory than NeoEMF ($mean$ = 10, $sd$ = 1.1 MBs) significantly ($t$ = -94.6, $df$ = 38.4, $p$-value $<$ 0.05). The similar significant increase on memory footprint ($t$ = -38131, $df$ = 25.8, $p$-value $<$ 0.05) also applies to Hybrid XMI ($mean$ = 12.8, $sd$ = 0.0 MBs) vs. XMI ($mean$ = 5.2, $sd$ = 0.0 MBs) when loading the model.  
 
 \subsection{Model Saving Time and Memory Footprint}
 \label{sec:model_saving_time}
@@ -313,31 +316,22 @@ We performed measurement 22 times for each dimension measured. The results of th
     \caption{Hybrid vs. state-based model persistence on model saving time.}
     \label{fig:save_time_epsilon}
 \end{figure}
-\ref{fig:save_memory_epsilon}
+
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/save_memory_epsilon}
     \caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model.}
     \label{fig:save_memory_epsilon}
 \end{figure}
 
+In this section, we present the results our evaluation on the time (Fig. \ref{fig:load_time_epsilon}) and memory footprint (Fig. \ref{fig:load_memory_epsilon}) for the hybrid model persistence to save a change made to the model. Using the same UML2 model version 940 of the Epsilon project, the results shows that the average saving time for each change made to Hybrid NeoEMF ($mean$ = 0.0892, $sd$ = 0.0421 seconds) is slightly slower than the one made to NeoEMF ($mean$ = 0.0829, $sd$ = 0.0494 seconds) but insignificant ($t$ = -0.45, $df$ = 40.97, $p$-value = 0.65). The slowdown is more significant ($t$ = -2.5, $df$ = 36.1, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.411, $sd$ = 0.023 seconds) vs. XMI ($mean$ = 0.397, $sd$ = 0.015 seconds) but still in the order of less than 0.02 seconds.  
+
+For the memory footprint after saving a change made to the model, Hybrid NeoEMF ($mean$ = 2.64, $sd$ = 1.29 MBs) uses more memory than NeoEMF ($mean$ = 2.61, $sd$ = 0.78 MBs) but still at the insignificant level ($t$ = -0.14, $df$ = 34.67, $p$-value $=$ 0.89). Hybrid XMI ($mean$ = 1.56355, $sd$ = 0.0005 MBs) also uses more memory than XMI ($mean$ = 1.56326, $sd$ = 0.0018 MBs) when loading the model but also still at the insignificant level ($t$ = -0.76, $df$ = 23.8, $p$-value $=$ 0.46).  
 
 \subsection{Storage Space Usage}
 \label{sec:storage_space_usage}
+We also performed evaluation on storage space usage of the hybrid model persistence. In addition to the CBP generated from the Epsilon project, we also generated two CBPs from the BPMN2 project \cite{eclipse2017bpmn2,eclipse2018bpmn2git}, and the United States (US) article \cite{wikipedia2018us} on Wikipedia (the article is further referred as Wikipedia). We generated the committed versions of the BPMN2 project as UML2 models \cite{eclipse2017uml2} and the versions of the Wikipedia article as MoDiscoXML models \cite{eclipse2018modiscoxml}.
 
-\begin{table} [ht]
-    \centering
-    \caption{Space Usage for the BPMN2 project. The CBP were generated from version 1 to 192 of the project.}
-    \label{table:space_usage_bpmn2}
-    \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
-        \hline 
-        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
-        \hline 
-        XMI & 62,062 &  & 6.55 MBs & 110 bytes / element  \\
-        NeoEMF & 62,062 &  & 134 MBs & 2 KBs / element \\
-        CBP &  & 1,238,751 & 109 MBs &  92 bytes / event \\
-        \hline 
-    \end{tabular}
-\end{table}
+For the Epsilon project, we have successfully generated its CBP from version 1 up to number 940 of all its versions. For the BPMN2 project and Wikipedia article, we have successfully generated their CBPs up to version number 192 and 10,187 respectively. The details (element count, event count, space size, and average space size per element or event) of their models if persisted in XMI, NeoEMF, and CBP can be seen in Table \ref{table:space_usage_epsilon}, \ref{table:space_usage_bpmn2}, and \ref{table:space_usage_wikipedia}. Using the tables, we can estimate roughly the growth of the models that every additional element consumes more than around 102 bytes for XMI and 2KBs for NeoEMF. Every change made to the models consumes more than around 92 bytes per persisted event. Thus, we can estimate the storage space usage for hybrid model persistence is the combination of CBP and XMI or NeoEMF.
 
 \begin{table} [ht]
     \centering
@@ -345,7 +339,7 @@ We performed measurement 22 times for each dimension measured. The results of th
     \label{table:space_usage_epsilon}
     \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
     \hline 
-    \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
+    \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Space Size} & \textbf{Average Space Size} \\
     \hline 
     XMI & 88,020 &  & 9.44 MBs & 112 bytes / element  \\
     NeoEMF & 88,020 &  & 188 MBs & 2 KBs / element \\
@@ -356,11 +350,26 @@ We performed measurement 22 times for each dimension measured. The results of th
 
 \begin{table} [ht]
     \centering
-    \caption{Space Usage for the Wikipedia's US article. The CBP were generated from version 1 to 10187 of the article.}
-    \label{table:space_usage_Wikipedia}
+    \caption{Space Usage for the BPMN2 project. The CBP were generated from version 1 to 192 of the project.}
+    \label{table:space_usage_bpmn2}
     \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
         \hline 
-        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
+        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Space Size} & \textbf{Average Space Size} \\
+        \hline 
+        XMI & 62,062 &  & 6.55 MBs & 110 bytes / element  \\
+        NeoEMF & 62,062 &  & 134 MBs & 2 KBs / element \\
+        CBP &  & 1,238,751 & 109 MBs &  92 bytes / event \\
+        \hline 
+    \end{tabular}
+\end{table}
+
+\begin{table} [ht]
+    \centering
+    \caption{Space Usage for the Wikipedia's US article. The CBP were generated from version 1 to 10187 of the article.}
+    \label{table:space_usage_wikipedia}
+    \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
+        \hline 
+        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Space Size} & \textbf{Average Space Size} \\
         \hline 
         XMI & 13,112 &  & 1.28 MBs & 102 bytes / element  \\
         NeoEMF & 13,112 &  & 31.8 MBs & 2 KBs / element \\
@@ -373,17 +382,28 @@ We performed measurement 22 times for each dimension measured. The results of th
 \label{sec:change_detection}
 
 
+\subsection{Threats to Validity and Limitations}
+\label{sec:threats_to_validity_and_limitations}
+In this work, we have only tested the hybrid model persistence approach on synthesised models which may not be representative of the characteristics of models made by a person or people in the real-world. The evaluation also has not been tested on big models -- models that contain more than a million elements and events. Moreover, our model comparison evaluation is limited only to detecting changes for versions of model that are developed sequentially, not in paralel. Versions of a model developed in parallel might have conflicts between them which requires conflict resolution before merging.
 
 \section{Discussion}
 \label{sec:discussion}
+The evaluation result on change detection in Section \ref{sec:change_detection} shows that model change detection in hybrid model persistence can be performed faster than using naive model comparison approach in state-based persistence. This is possible because elements and features that have been modified can be directly identified through the events recorded in its change-based persistence without necessity to compare the models element-by-element. The use of state-based persistence in hybrid model persistence enables faster loading of model, as shown by the result of loading time evaluation in Section \ref{sec:model_loading_time}, without having to replay all the changes persisted in its change-based persistence -- the main challenge change-based approach \cite{mens2002state}. 
+The hybrid model persistence only performs slightly slower and insignificant on model loading compared to loading a model in state-based persistence. The slight slowndown also appears on model saving, but also at the insignificant level as reported in Section \ref{sec:model_saving_time}, because changes have to be persisted into two representation, state-based and change-based. 
+
+The subtle drawbacks of hybrid model persistence is that it consumes more memory when loading and saving and storage space for persisting models compared to state-based representation only (see Section \ref{sec:model_loading_time}, \ref{sec:model_saving_time}, and \ref{sec:storage_space_usage}). However, considering the cost of main memory and storage, this trade-off will be paid off.
 
 \section{Related Work}
 \label{sec:related_work}
+ Change-based persistence-like approach has been used widely in many incremental projects (e.g IncQuery \cite{DBLP:conf/ecmdafa/RathHV12}, ReactiveATL \cite{DBLP:conf/ecmdafa/OgunyomiRK15}) usually by harnessing the notification facilities that already provided by the platform (e.g. Eclipse). It is also has been applied in other artefacts, such as software \cite{DBLP:journals/entcs/RobbesL07}, database \cite{DBLP:conf/sde/LippeO92}, hierarchical documents \cite{DBLP:conf/caise/IgnatN05}, model repository and version control \cite{koegel2010emfstore}. The approach is claimed faster for detecting changes \cite{DBLP:conf/edoc/KoegelHLHD10}, more accurate and carries semantic information \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,mens2002state}, faster and more accurate for comparison and merging \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,koegel2010emfstore}, and information carried is useful for analytics \cite{DBLP:journals/entcs/RobbesL07}.
+
  There are several non-XMI approaches to state-based model persistence, using relational or NoSQL databases. For example, EMF Teneo\,\cite{eclipse2017teneo} persists EMF models in relational databases, while Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} persist models in document and graph databases, respectively.  None of these approaches provides built-in support for versioning and models are eventually stored in binary files/folders which are known to be a poor fit for text-oriented version control systems like Git and SVN. Connected Data Objects (CDO) \cite{eclipse2017cdo}, provides support for database-backed model persistence as well as collaboration facilities, but its adoption necessitates the use of a separate version control system in the software development process (e.g. a Git repository for code and a CDO repository for models), which introduces fragmentation and administration challenges \cite{barmpis2014evaluation}. Similar challenges arise in relation to other model-specific version control systems such as EMFStore\,\cite{koegel2010emfstore}.
 
 \section{Conclusions and Future Work}
 \label{sec:conlcusions_and_future_work}
+In this paper, we propose a hybrid model persistence and evaluate its impact on time and memory footprint for model loading and saving, storage space usage, and detecting changes of versions of the same model. Based on the evaluation results, the hybrid model persistence provides considerable benefits on model loading time and change detection with acceptable trade-off on memory footprint and storage space usage.
 
+For our future work, we plan to evaluate the hybrid model persistence on big models, and perform simulations where software modellers are asked to construct several models. The changes of the models will be recorded into change-based model representations and upscaled to better reflect changes of models in the real-world. We also plan to develop a solution to compare and merge different versions of a change-based model that are developed in parallel.  
 
 % An example of a floating figure using the graphicx package.
 % Note that \label must occur AFTER (or within) \caption.
