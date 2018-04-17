@@ -64,11 +64,12 @@
 \usepackage{hyperref}
 	\hypersetup{colorlinks=true,allcolors=blue}
 \usepackage{hypcap}
-\usepackage{subfig}
+\usepackage{caption}
+\usepackage{subcaption}
 \usepackage{listings}
 \lstset{
  		basicstyle=\ttfamily\scriptsize,
- 		frame=single,
+ 		%frame=single,
  		breaklines=true,
  		numbers=left,
  		xleftmargin=2.5em,
@@ -114,13 +115,13 @@
 
 % author names and affiliations
 % use a multiple column layout for up to three different
-% affiliations
+% affiliations\ref{abstract}
 \author{\IEEEauthorblockN{Alfa Yohannis\IEEEauthorrefmark{1}, Horacio Hoyos Rodriguez\IEEEauthorrefmark{2}, Fiona Polack\IEEEauthorrefmark{3}, Dimitris Kolovos\IEEEauthorrefmark{4}}
 \IEEEauthorblockA{
     \IEEEauthorrefmark{1}\IEEEauthorrefmark{2}\IEEEauthorrefmark{4}Department of Computer Science, University of York, York, United Kingdom \\
     \IEEEauthorrefmark{3}School of Computing and Maths, Keele University, United Kingdom \\
 Email: \IEEEauthorrefmark{1}ary506@york.ac.uk, \IEEEauthorrefmark{2}horacio\_hoyos\_rodriguez@ieee.org, \\
-\IEEEauthorrefmark{3}f.a.c.polack@keele.a.cuk, \IEEEauthorrefmark{4}dimitris.kolovos@york.ac.uk}}
+\IEEEauthorrefmark{3}f.a.c.polack@keele.ac.uk, \IEEEauthorrefmark{4}dimitris.kolovos@york.ac.uk}}
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -193,21 +194,23 @@ Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model
 \label{sec:hybrid_model_persistence}
 Hybrid model persistence is essentially combining two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified, the occurred changes are recorded into both representations of persistence. The former persists all the changes to keep the model's history, while the latter is used to maintain the last state of the model produced by the changes. In terms of loading, the model is directly loaded from the state-based representation. Thus, replaying all the changes from its change-based representation -- which is time consuming -- to get the last state of the model can be avoided.
 
-These ideas are then translated into an inplementation that conforms to metamodelling architectures such as MOF \cite{omg2018mof} and EMF \cite{steinberg2008emf}. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with an implementation of state-based persistence, the NeoEMF \cite{daniel2016neoemf}. The design of our implementation follows the class diagram presented in Fig. \ref{fig:loadtime}. 
+These ideas are then translated into an inplementation that conforms to metamodelling architectures such as MOF \cite{omg2018mof} and EMF \cite{steinberg2008emf}. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with two state-based persistence implementations, NeoEMF \cite{daniel2016neoemf} and XMI \cite{omg2018xmi}. The design of our implementation follows the class diagram presented in Fig. \ref{fig:class_diagram}. 
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/class_diagram}
     \caption{The class diagram of hybrid model persistence.}
-    \label{fig:loadtime}
+    \label{fig:class_diagram}
 \end{figure}
 
-The Epsilon CBP provides a $ChangeEventAdapter$ class, an derived $EContentAdapter$ adapter class that collects changes made to a model in the form a list of events, $changeEvents$. The events occur when the model is modified and are recorded by the class. Based on this class, we derives another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter classes for NeoEMF (an adapter class for EMF's default XMI resource also has been developed, but it is out of the scope of this paper). This class overrides the $notifyChanged(Notification)$ that belongs to the $ChangeEventAdapter$ class to handle events that are specific to NeoEMF. 
+The Epsilon CBP provides a $ChangeEventAdapter$ class, an derived $EContentAdapter$ adapter class that collects changes made to a model in the form a list of events, $changeEvents$. The events occur when the model is modified and are recorded by the class. Based on this class, we derives another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter class for NeoEMF and the $ChangeHybridXMIEventAdapater$ for XMI. These classes override the $notifyChanged(Notification)$ that belongs to the $ChangeEventAdapter$ class to handle events that are specific to NeoEMF and XMI respectively. 
 
-We also create a resource class for hybrid persistence, the $HybridResource$ class. The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence, such as NeoEMF and XMI (this paper only include the hybrid model persistence for NeoEMF). The $HybridResource$ class contains the $stateBasedResource$ attribute which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ attribute that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former class can access the events collected by the latter class, and the latter class can also use functionalities provided by the former class (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
+We also create a resource class for hybrid persistence, the $HybridResource$ class. The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence (e.g. NeoEMF and XMI). The $HybridResource$ class contains the $stateBasedResource$ attribute which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ attribute that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former class can access the events collected by the latter class, and the latter class can also use functionalities provided by the former class (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
 
-The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, which is derived from the $HybridPersistence$. Its constructor takes two parameters: a $PersistentResource$ of NeoEMF resource and an $OutputStream$ of a change-based model persistence. These two inputs are assigned to the derived $stateBasedResource$ and $cbpOutputStream$ attributes respectively. This class also implements the NeoEMF's $HybridPersistence$ interface so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a Neo4j database). Inside the $HybridNeoEMFResourceImpl$'s constructor, an instance of the $HybridChangeEventAdapater$ is registered to the $eAdapters$ list of the NeoEMF resource to collect changes made to a model (Fig. \ref{lst:attach_adapater}). 
+The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, and $HybridXMIResourceImpl$ class for XMI. Both are derived from the $HybridPersistence$. Their constructors take two parameters: a $PersistentResource$ for NeoEMF or $Resource$ for XMI, and an $OutputStream$ of a change-based model persistence. These two inputs are assigned to the derived $stateBasedResource$ and $cbpOutputStream$ attributes respectively. For $HybridNeoEMFResourceImpl$ , this class also implements the NeoEMF's $HybridPersistence$ interface so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a backend database). 
 
-\begin{lstlisting}[style=java,caption={A simplified code to connect a change-based model persistence's event adapater to a state-based resource.},label=lst:attach_adapater]
+Inside the $HybridNeoEMFResourceImpl$'s constructor, a $HybridChangeEventAdapater$ is registered to the NeoEMF resource's $eAdapters$ in order for the adapter can listen to changes (Fig. \ref{lst:attach_adapater_neo}). The same procedure is also applied to XMI in order for the adapter to work (Fig. \ref{lst:attach_adapater_xmi}). 
+
+\begin{lstlisting}[style=java,caption={A simplified code to connect a change-based model persistence's event adapater to a NeoEMF resource.},label=lst:attach_adapater_neo]
 public HybridNeoEMFResourceImpl(PersistentResource persistentResource, OutputStream outputStream) throws IOException {
     ...
     this.stateBasedResource = persistentResource;
@@ -217,20 +220,39 @@ public HybridNeoEMFResourceImpl(PersistentResource persistentResource, OutputStr
 }
 \end{lstlisting}
 
-Basically, the hybrid model persistence only executes the code in List. \ref{lst:hybrid_load} to load a model. It overrides the load method of the $ResourceImpl$ class (line 1-2) and executes the load method of the NeoEMF resource (line 4).
+\begin{lstlisting}[style=java,caption={A simplified code to connect a change-based model persistence's event adapater to an XMI resource.},label=lst:attach_adapater_xmi]
+public HybridXMIResourceImpl(Resource resource, OutputStream outputStream) throws IOException {
+...
+this.stateBasedResource = resource;
+hybridChangeEventAdapter = new HybridXMIChangeEventAdapter(this);
+stateBasedResource.eAdapters().add(hybridChangeEventAdapter);
+...
+}
+\end{lstlisting}
 
-\begin{lstlisting}[style=java,caption={A simplified code to load a model from the state-based representation of the hybrid model persistence .},label=lst:hybrid_load]
+Basically, the hybrid model persistence only executes the code in List. \ref{lst:hybrid_load_neo} to load a model. It overrides the $load$ method of the $ResourceImpl$ class (line 1-2) and executes the load method of the NeoEMF resource (line 4). The same steps also apply to hybrid model persistence with XMI resource, except that it overrides the $doLoad$ method of the $ResourceImpl$, in order to load properly (List. \ref{lst:hybrid_load_xmi}). 
+
+\begin{lstlisting}[style=java,caption={The simplified $load$ method of the hybrid model persistence with NeoEMF as its state-based resource.},label=lst:hybrid_load_neo]
 @Override
 public void load(Map<?, ?> options) throws IOException {
-    ...
+    ... 
     stateBasedResource.load(options);
     ...
 }
 \end{lstlisting}
 
-In saving a model, the hybrid model persistence overrides the save method of the $ResourceImpl$ class (line 1-2). It executes the save method of the NeoEMF resource (line 4) and then runs the $saveChangeBasedPersitence$ method to save the changes made to the model to a change-based model's $OutputStream$.
+\begin{lstlisting}[style=java,caption={The simplified $load$ method of the hybrid model persistence with XMI as its state-based resource.},label=lst:hybrid_load_xmi]
+@Override
+public void doLoad(Map<?, ?> options) throws IOException {
+    ... 
+    stateBasedResource.load(options);
+    ...
+}
+\end{lstlisting}
 
-\begin{lstlisting}[style=java,caption={A simplified code to save a model to both state and change-based representation of the hybrid model persistence.},label=lst:hybrid_save]
+In saving a model, the  $HybridNeoEMFResourceImpl$ and $HybridXMIResourceImpl$ overrides the $save$ and $doSave$ method of the $ResourceImpl$ class (List. \ref{lst:hybrid_save_neo} and \ref{lst:hybrid_save_xmi}, line 1-2). Inside both methods, both resources execute the $save$ method of their state-based persistence (line 4) and execute the $saveChangeBasedPersitence$ method to save changes made to a model to a change-based representation represented by the $cbpOutputStream$.
+
+\begin{lstlisting}[style=java,caption={A simplified code to save a model to both state and change-based representation of the hybrid model persistence.},label=lst:hybrid_save_neo]
 @Override
 public void save(Map<?, ?> options) throws IOException {
     ...
@@ -240,38 +262,120 @@ public void save(Map<?, ?> options) throws IOException {
 }
 \end{lstlisting}
 
+\begin{lstlisting}[style=java,caption={A simplified code to save a model to both state and change-based representation of the hybrid model persistence.},label=lst:hybrid_save_xmi]
+@Override
+public void doSave(Map<?, ?> options) throws IOException {
+    ...
+    stateBasedResource.save(options);
+    saveChangeBasedPersistence(cbpOutputStream, options);
+    ...
+}
+\end{lstlisting}
+
 \section{Evaluation}
 \label{sec:evaluation}
-For evaluation, show the loading/saving/space overhead of CBP/NeoEMF vs. pure NeoEMF as well as the performance benefits in terms of model comparison and argue that the former is a fair trade-off for the latter (I suspect that state-based comparison will explode sufficiently large models)
 
-We developed the proposed efficient loading approach on top of the original CBP implementation\footnote{The prototype, tests, and data used in the evaluation are available under \url{https://github.com/epsilonlabs/emf-cbp} and \url{https://goo.gl/1zUBQC} for reproducibility} from \cite{DBLP:conf/models/YohannisKP17} and evaluated our approach's model loading performance, as well as its memory footprint and its impact on the time required to save changes made to CBP models. The evaluation was performed on Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-6500U CPU@2.50GHz 2.59GHz, 12GB RAM, and the Java\textsuperscript{TM} SE Runtime Environment (build 1.8.0\textunderscore162-b12).
+In this section, we compare hybrid model persistence (Epsilon CBP and NeoEMF or XMI) vs. state-based persistence (NeoEMF or XMI only) on loading, saving, and storage space usage of models and argue that hybrid model persistence offers a fair trade-off for the latter. 
 
-Given that CBP is a very recent contribution and we are not aware of any existing datasets containing real-world models expressed in a change-based format, we have used synthetic change-based models for the evaluation of our experiments. The synthetic models were derived from real-world cases: the BPMN2 \cite{eclipse2017bpmn2,eclipse2018bpmn2git} and Epsilon \cite{eclipse2017epsilon,eclipse2018epsilongit} software projects, and the United States article \cite{wikipedia2018us} on Wikipedia (the article is further referred as Wikipedia). For the first two projects, for each version of the cases, we used MoDisco \cite{DBLP:journals/infsof/BruneliereCDM14} to generate a UML2 \cite{eclipse2017uml2} model that reflects its source code. For the Wikipedia article, a model that conforms to the Modisco XML metamodel \cite{eclipse2018modiscoxml} was generated. Since these cases have many versions -- represented by commits/revisions, different models of the versions can be generated, and to some degree, they reflect the time-ordered changes of the cases. The synthetic change-based model for each case was derived by comparing an initially-empty running model to different versions of the case's models sequentially. All identified differences were then reconciled by performing a unidirectional merging to the running model. All changes made to the running model during the merging process were captured and persisted into a CBP file. EMF Compare was used \cite{eclipse2017compare} to perform the comparison and merging.
+\subsection{Evaluation Method}
+\label{sec:evaluation_method}
+We developed the prototype of the proposed hybrid model persistence approach\footnote{The prototype, tests, and data used in the evaluation are available under \url{https://github.com/epsilonlabs/emf-cbp} and \url{https://goo.gl/1zUBQC}.}. The evaluation was performed on Intel\textsuperscript{\textregistered} Core\textsuperscript{TM} i7-6500U CPU@2.50GHz 2.59GHz, 12GB RAM, and the Java\textsuperscript{TM} SE Runtime Environment (build 1.8.0\textunderscore162-b12).
 
-Using the synthetic models, we performed performance evaluation on loading time, saving time, and memory footprint for both loading and saving. To compare the loading time, we ran the optimised and original (baseline) CBP algorithms to reconstruct the current state of each of the three models (the results are shown in Figure \ref{fig:loadtime}). As discussed in Section \ref{sec:loading_time_optimisation}, optimised CBP also does extra work when saving the changes to a model, in order to save time (relative to original CBP) when loading a model. To analyse the performance effect of optimisation activities, we, therefore, compared the overall time required to save a new version of the models described above, after one single change has been made (The results are shown in Figure \ref{fig:savetime}). We also compare the memory footprints for both loading and saving since the optimised CBP approach also requires the maintenance of an additional in-memory data structure that keeps track of element and feature editing histories (see Figure \ref{fig:loadmemory} and \ref{fig:savememory} for the results). 
+For the evaluation, we used synthetic hybrid models derived from a real-world project, the Epsilon \cite{eclipse2017epsilon,eclipse2018epsilongit}. For state-based representation of the models, we used MoDisco \cite{DBLP:journals/infsof/BruneliereCDM14} to generate XMI-based UML2 \cite{eclipse2017uml2} models that reflect the source code of the project and then imported the generated models into NeoEMF. While obtaining the state-based part is trivial, obtaining its change-based part that reflects the changes of a real-world project was not straightforward. The change-based part was derived from the diffs identified from the subsequent versions of the project committed on its Git repository. Since the project have many committed versions, different models can be generated, and to some degree, they reflect the time-ordered changes of the cases. The change-based representation was derived by comparing an initially-empty running model to the generated models sequentially, version-by-version. All identified differences were then reconciled by performing a unidirectional merging to the running model. All changes made to the running model during the merging process were captured and persisted into a CBP file. EMF Compare was used \cite{eclipse2017compare} to perform the comparison and merging.
 
-For each combination of dimensions (loading time, saving time, loading memory footprint, saving memory footprint),  persistence types (original CBP, optimised CBP, and XMI), and cases (BPMN2, Epsilon, and Wikipedia), we performed measurement 22 times. The results of the measurement enabled us to perform the Welch's t-test \cite{welch1947ttest} to find the significance of the comparisons for each case. We used a significance level of 5\%. If t-test' $p$-$value$ $<$ 0.05, we rejected the null hypothesis -- the $means$ of the compared persistence types are equal ($H_0$) -- and accepted the alternative hypothesis -- the $means$ of the compared persistence types are not equal ($H_1$).
+Using the models, we performed performance evaluation on loading time, saving time, and memory footprint for both loading and saving. We compared the performance of the hybrid approach against state-based-only approach. For loading and saving time, we measured the delta time required to complete the loading and saving. For memory footprint, we measured the delta of memory used before and after loading and saving completes. Specifically for saving, we measured the time and memory footprint required to save a new version of a model, after one single change has been made to the model. We also measured the impact of using the hybrid approach on the execution time of a model comparison, specifically for identifying differences between a model and its preceding versions. The hybrid approach was compared to model-to-model comparison using EMF Compare on their execution time.
 
-For loading and saving time, we measured the delta time required to complete the loading and saving. For memory footprint, we measured the delta of memory used before and after loading and saving completes. The results are presented below.
+We performed measurement 22 times for each dimension measured. The results of the measurement enabled us to perform the Welch's t-test \cite{welch1947ttest} to find the significance of the comparisons for each case. We used a significance level of 5\%. If t-test' $p$-$value$ $<$ 0.05, we rejected the null hypothesis -- the $means$ of the compared persistence types are equal ($H_0$) -- and accepted the alternative hypothesis -- the $means$ of the compared persistence types are not equal ($H_1$).  
 
-\subsection{Model Loading Time}
+\subsection{Loading Time and Memory Footprint}
 \label{sec:model_loading_time}
 
-\subsection{Model Saving Time}
+
+\begin{figure}[ht]
+        \includegraphics[width=\linewidth]{images/load_time_epsilon}
+    \caption{Hybrid vs. state-based model persistence on model loading time.}
+            \label{fig:load_time_epsilon}
+\end{figure}
+
+\begin{figure}[ht]
+        \includegraphics[width=\linewidth]{images/load_memory_epsilon}
+        \caption{loading memory footprint}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of loading a model.}
+\label{fig:load_memory_epsilon}
+\end{figure}
+
+
+\subsection{Model Saving Time and Memory Footprint}
 \label{sec:model_saving_time}
 
-\subsection{Memory Footprint for Loading Model}
-\label{sec:memory_footprint_for_loading_model}
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_time_epsilon}
+    \caption{Hybrid vs. state-based model persistence on model saving time.}
+    \label{fig:save_time_epsilon}
+\end{figure}
+\ref{fig:save_memory_epsilon}
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_memory_epsilon}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model.}
+    \label{fig:save_memory_epsilon}
+\end{figure}
 
-\subsection{Memory Footprint for Saving Model}
-\label{sec:memory_footprint_for_saving_model}
 
 \subsection{Storage Space Usage}
 \label{sec:storage_space_usage}
 
+\begin{table} [ht]
+    \centering
+    \caption{Space Usage for the BPMN2 project. The CBP were generated from version 1 to 192 of the project.}
+    \label{table:space_usage_bpmn2}
+    \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
+        \hline 
+        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
+        \hline 
+        XMI & 62,062 &  & 6.55 MBs & 110 bytes / element  \\
+        NeoEMF & 62,062 &  & 134 MBs & 2 KBs / element \\
+        CBP &  & 1,238,751 & 109 MBs &  92 bytes / event \\
+        \hline 
+    \end{tabular}
+\end{table}
+
+\begin{table} [ht]
+    \centering
+    \caption{Space Usage for the Epsilon project. The CBP were generated from  version 1 to 940 of the project.}
+    \label{table:space_usage_epsilon}
+    \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
+    \hline 
+    \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
+    \hline 
+    XMI & 88,020 &  & 9.44 MBs & 112 bytes / element  \\
+    NeoEMF & 88,020 &  & 188 MBs & 2 KBs / element \\
+    CBP &  & 4,307,051 & 406 MBs &  98 bytes / event \\
+    \hline 
+    \end{tabular}
+\end{table}
+
+\begin{table} [ht]
+    \centering
+    \caption{Space Usage for the Wikipedia's US article. The CBP were generated from version 1 to 10187 of the article.}
+    \label{table:space_usage_Wikipedia}
+    \begin{tabular}{ p{0.1\linewidth} p{0.1\linewidth} p{0.12\linewidth} p{0.13\linewidth} p{0.26\linewidth} }
+        \hline 
+        \textbf{Type} & \textbf{Element Count} & \textbf{Event Count} & \textbf{Size} & \textbf{Average} \\
+        \hline 
+        XMI & 13,112 &  & 1.28 MBs & 102 bytes / element  \\
+        NeoEMF & 13,112 &  & 31.8 MBs & 2 KBs / element \\
+        CBP &  & 62,271,003 & 5.85 GBs &  98 bytes / event \\
+        \hline 
+    \end{tabular}
+\end{table}
+
+\subsection{Change Detection}
+\label{sec:change_detection}
+
+
+
 \section{Discussion}
 \label{sec:discussion}
-
 
 \section{Related Work}
 \label{sec:related_work}
