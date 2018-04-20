@@ -177,7 +177,7 @@ Email: \IEEEauthorrefmark{1}ary506@york.ac.uk, \IEEEauthorrefmark{2}horacio\_hoy
 % in the abstract
 \begin{abstract}
 \label{abstract}
-Change-based approach comes with the advantages of carrying more accurate semantic information of the evolution of technological artefacts and thus can be potentially used for faster and more accurate model comparison, merging, and analytics. On the other hand, state-based model persistence is growing on its capabilities to process large-scale models by harnessing the power of big data backend. In this work, we integrate both persistence into one single approach, a hybrid model persistence, in order to gain the benefits of both. In this  paper, we present the design of our hybrid model persistence and report its impact on time and memory footprint for model loading and saving, storage space usage, and detecting changes of versions of the same model. We conclude that hybrid model persistence can provide considerable benefits on model loading time and change detection with an acceptable trade-off on memory footprint and storage space usage. 
+Change-based approach comes with an advantage of carrying more accurate semantic information of the changes of a technological artefact. Thus, the information can be potentially used to produce faster and more accurate model comparison, merging, and analytics. On the other hand, state-based model persistence is growing on its capabilities to process large-scale models by harnessing the power of big data backend. In this work, we integrate both persistence into one single approach, a hybrid model persistence, in order to gain the benefits of both. In this  paper, we present the design of our hybrid model persistence and report its impact on time and memory footprint for model loading and saving, storage space usage, and detecting changes of versions of the same model. We conclude that hybrid model persistence can provide considerable benefits on model loading time and change detection with an acceptable trade-off on memory footprint and storage space usage. 
 \end{abstract}
 %
 % no keywords
@@ -200,30 +200,94 @@ model persistence, hybrid model persistence, change-based model persistence, sta
 \label{sec:introduction}
 Change-based model persistence of models conforming to metamodelling architectures such as MOF/EMF \cite{DBLP:conf/models/YohannisKP17} comes with notable advantages: it provides support for fast comparison of versions of the same model \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,DBLP:conf/edoc/KoegelHLHD10,koegel2010emfstore}  -- which can also substantially speed up incremental model management activities, and recording fine-grained changes in models that can enable model analytics (e.g. understand how modellers use modelling languages and tools) \cite{DBLP:journals/entcs/RobbesL07}. However, change-based approach comes at a cost of ever-growing model files \cite{DBLP:conf/edoc/KoegelHLHD10,DBLP:journals/entcs/RobbesL07} and increased loading time \cite{mens2002state}. In this work we are addressing the latter by introducing the concept of hybrid model persistence. In hybrid model persistence the change-based representation is augmented with a fully derived, state-based representation of the latest snapshot of the model which is used to speed up model loading and querying. We investigate the impact of the hybrid model persistence on model loading and saving time, memory footprint on loading and saving a model, and storage space usage, and argue that hybrid model persistence is a fair trade-off for state-based persistence.
  
-The rest of the paper is structured as follows. Section \ref{sec:change_and_state_based_model_persistence} introduces the concept of change-based model persistence. Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model persistence. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
+The rest of the paper is structured as follows. Section \ref{sec:change_and_state_based_model_persistence} introduces the concept of change-based model persistence and recent work on state-based model persistence. Section \ref{sec:hybrid_model_persistence} presents our approach to hybrid model persistence. Section \ref{sec:evaluation} presents experimental results and evaluation. Section \ref{sec:related_work} provides an overview of related work, and Section \ref{sec:conlcusions_and_future_work} concludes with a discussion on directions of future work.
 
 \section{Change and State-based Model Persistence}
 \label{sec:change_and_state_based_model_persistence}
-To explain the concept of change-based model persistence, we have two versions of a UML2 \cite{eclipse2017uml2} model persisted in the state-based XMI format: the first one is the initial version when the model is created (List. \ref{lst:xmimodel1}), and the second one is when the model has been modified (Fig. \ref{lst:xmimodel2}). In the first session when creating the first version of the model, a package is created and its name is set to ``X''. Two classes also created and their names are set to ``A'' and ``B''. Both classes are then added to the package. The model is then saved and produces a state-based model as presented in List. \ref{lst:xmimodel1}. In the second session, the model is modified by renaming the class `B'' to ``C'' and removing the class ``A'' from its package and deleting it entirely from the model. After that, the model is saved again to produce the second version of the model as presented in List. \ref{lst:xmimodel2}.
+To explain the concept of change-based model persistence, we have two versions of a UML2 \cite{eclipse2017uml2} model persisted in the state-based XMI format: the first one is the initial version when the model is created (List. \ref{lst:xmimodel1}), and the second one is when the model has been modified (Fig. \ref{lst:xmimodel2}). In the first session when creating the first version of the model, a package is created and its name is set to ``X''. Two classes also created and their names are set to ``A'' and ``B''. Both classes are then added to the package. The model is then saved and produces a state-based model as presented in List. \ref{lst:xmimodel1}. In the second session, the model is modified by renaming the class `B'' to ``C'' and removing the class ``A'' from its package and deleting it entirely from the model. After that, the model is saved again to produce the second version of the model as presented in List. \ref{lst:xmimodel2}. The visual illustration of these series of modification is depicted in Fig. \ref{fig:illustration_cbp}.
 
-\begin{lstlisting}[style=xmi,caption={The first version of the UML2 example model in XMI format when initially created.},label=lst:xmimodel1]
+\begin{lstlisting}[style=xmi,caption={The first version of the UML2 example model in XMI format after the first session.},label=lst:xmimodel1]
 <?xml version="1.0" encoding="ASCII"?>
 <uml:Package xmi:id="1" name="X">
-    <packagedElement xsi:type="uml:Class" xmi:id="2" name="A"/>
-    <packagedElement xsi:type="uml:Class" xmi:id="3" name="B"/>
+<packagedElement xsi:type="uml:Class" xmi:id="2" name="A"/>
+<packagedElement xsi:type="uml:Class" xmi:id="3" name="B"/>
 </uml:Package>
 \end{lstlisting}
 
 \begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model in XMI format after the second session.},label=lst:xmimodel2]
 <?xml version="1.0" encoding="ASCII"?>
 <uml:Package xmi:id="1" name="X">
-    <packagedElement xsi:type="uml:Class" xmi:id="3" name="C"/>
+<packagedElement xsi:type="uml:Class" xmi:id="3" name="C"/>
 </uml:Package>
 \end{lstlisting}
 
-Change-based model persistence, instead of saving the state of a model, save the changes made to a model in the form of a list of events. These events are collected in memory and appended into a change-based file when the model is saved. Since only the changes are persisted, in the context of large models, it makes model saving runs faster than saving an entire model at once. The series of changes made to the example model in both sessions can be seen in a text-formatted, change-based persistence presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted change events have to be replayed again -- simulating the construction of the model from the beginning.
+\begin{figure}[ht]
+    %row 1
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_1}
+        \caption{lines 2-3}
+        \label{fig:illustration_1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_2}
+        \caption{lines 4-5}
+        \label{fig:illustration_2}
+    \end{subfigure}
+    %row 2
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_3}
+        \caption{lines 6-7 }
+        \label{fig:illustration_3}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_4}
+        \caption{line 8}
+        \label{fig:illustration_4}
+    \end{subfigure}
+    %row 3
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_5}
+        \caption{line 9}
+        \label{fig:illustration_5}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_6}
+        \caption{line 11 }
+        \label{fig:illustration_6}
+    \end{subfigure}
+    %row 4
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_7}
+        \caption{line 12}
+        \label{fig:illustration_7}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\linewidth}
+        \centering
+        \includegraphics[width=\linewidth]{images/illustration_8}
+        \caption{line 13}
+        \label{fig:illustration_8}
+    \end{subfigure}
+    
+    \caption{The states of the example model after certain changes and their corresponding lines in List. \ref{lst:cbpmodel}.}
+    \label{fig:illustration_cbp}
+\end{figure}
 
-\begin{lstlisting}[style=eol,caption={The text change-based persistence of both versions in List. \ref{lst:xmimodel1} and \ref{lst:xmimodel2}.},label=lst:cbpmodel]
+
+
+Change-based model persistence, instead of saving the state of a model, save the changes made to a model in the form of a list of events. These events are collected in memory and appended into a change-based file when the model is saved. Since only the changes are persisted, not the entire elements of a model, it can speed up model saving specifically in the context of large models. The series of changes made to the example model in both sessions can be seen in a text-formatted, change-based persistence presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted change events have to be replayed again -- simulating the construction of the model from the beginning.
+
+\begin{lstlisting}[style=eol,caption={The text change-based persistence of both versions in List. \ref{lst:xmimodel1} and \ref{lst:xmimodel2}. The visual illustration can be been in Fig. \ref{fig:illustration_cbp}.},label=lst:cbpmodel]
 session 1
 create p1 of Package
 set p1.name to "X"  
@@ -238,6 +302,10 @@ set c2.name to "C"
 remove c1 from p1.children   
 delete c1
 \end{lstlisting}
+
+
+
+
 
 While finding the differences between the first version and the second version of the model can be very quick since the the size of the model is very small, the task can be expensive for large models. Detecting changes can be time consuming since comparison has to be made element-to-element, element-by-element to identify the differences between two versions of a model. In change-based persistence, information about the changed elements between a version and its previous versions is already contained in the persistence. Thus, the information can be potentially used to speed up model change detection and comparison. Change-based-like approach also has been used for rapid incremental model management, such as the incremental query for derived features of EMF \cite{DBLP:conf/ecmdafa/RathHV12} and incremental model-to-text transformation \cite{DBLP:conf/ecmdafa/OgunyomiRK15}.
 
@@ -267,7 +335,7 @@ A new approach is required to maintain the benefits of both approaches with acce
 
 \section{Hybrid Model Persistence}
 \label{sec:hybrid_model_persistence}
-Hybrid model persistence is essentially combines two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified by a client, the occurred changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. Changes persisted into the change-based representation are fully derived from the changes happened on the state-based representation. Since the change-based representation is text-based, it can be stored in a version control repository. In terms of querying (including loading), the model is directly queried from the state-based representation. Thus, replaying all the changes from its change-based representation to get the last state of the model -- which is time consuming -- can be avoided. This mechanism of the hybrid model persistence is presented in Fig. \ref{fig:hybrid_persistence}.
+Hybrid model persistence is essentially combines two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified by a client, the occurred changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. Changes persisted into the change-based representation are fully derived from the changes happened on the state-based representation. Since the change-based representation is text-based, it can be stored in a version control repository. In terms of querying (including loading), the model is directly queried from the state-based representation. Thus, replaying all the changes from its change-based representation to get the last state of the model -- which is time consuming -- can be avoided. This hybrid model persistence's mechanism is presented in Fig. \ref{fig:hybrid_persistence}.
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/hybrid_persistence}
