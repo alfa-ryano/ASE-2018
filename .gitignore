@@ -57,3 +57,7 @@ IEEEtran_HOWTO.pdf
 ASE-2018.pdf
 ASE-2018.run.xml
 ASE-2018-blx.bib
+
+.project
+.texlipse
+tmp
