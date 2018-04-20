@@ -214,7 +214,7 @@ To explain the concept of change-based model persistence, we have two versions o
 </uml:Package>
 \end{lstlisting}
 
-\begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model in XMI format after ``Class A'' is deleted.},label=lst:xmimodel2]
+\begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model in XMI format after the second session.},label=lst:xmimodel2]
 <?xml version="1.0" encoding="ASCII"?>
 <uml:Package xmi:id="1" name="X">
     <packagedElement xsi:type="uml:Class" xmi:id="3" name="C"/>
@@ -226,15 +226,15 @@ Change-based model persistence, instead of saving the state of a model, save the
 \begin{lstlisting}[style=eol,caption={The text change-based persistence of both versions in List. \ref{lst:xmimodel1} and \ref{lst:xmimodel2}.},label=lst:cbpmodel]
 session 1
 create p1 of Package
-set p1.name to "Package X"  
+set p1.name to "X"  
 create c1 of Class
-set c1.name to "Class A"
+set c1.name to "A"
 create c2 of Class
-set c2.name to "Class B"
+set c2.name to "B"
 add c1 to p1.packagedElement   
 add c2 to p1.packagedElement
 session 2
-set c2.name to "Class C"
+set c2.name to "C"
 remove c1 from p1.children   
 delete c1
 \end{lstlisting}
@@ -242,8 +242,6 @@ delete c1
 While finding the differences between the first version and the second version of the model can be very quick since the the size of the model is very small, the task can be expensive for large models. Detecting changes can be time consuming since comparison has to be made element-to-element, element-by-element to identify the differences between two versions of a model. In change-based persistence, information about the changed elements between a version and its previous versions is already contained in the persistence. Thus, the information can be potentially used to speed up model change detection and comparison. Change-based-like approach also has been used for rapid incremental model management, such as the incremental query for derived features of EMF \cite{DBLP:conf/ecmdafa/RathHV12} and incremental model-to-text transformation \cite{DBLP:conf/ecmdafa/OgunyomiRK15}.
 
 On contrary, change-based approach also comes disadvantages. It is increased in record size \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/edoc/KoegelHLHD10} and not efficient for replaying (loading)  long records \cite{mens2002state}. Even thought an attempt has been made to reduce the loading time \cite{yohannis2018towards}, it can only be reduced up to around 50\%, and it still cannot outperformed loading a model from a state-based format. On the other hand, state-based model persistence is growing on its capabilities to process large-scale models by harnessing the power of big data backend. Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} has been able to load and query models with more than a million elements since they are able to handle model's elements partially without having to load all the elements into memory when using the standard XMI persistence. However, using these backends hindered the models to be versioned on common version control systems (e.g. Git, SVN), which is crucial for collaborative development.
-
-A new approach is required to maintain the benefits of both approaches with acceptable trade-off. Thus, we proposed a hybrid model persistence -- an approach that uses change and state-based persistence side-by-side to persist models. One notable drawback for this persistence is it requires more storage space since models are saved into two types of persistence. Table \ref{table:persistence_comparsion} summarises the benefits and drawbacks of the change and state-based model persistence and the potential benefits and drawbacks of the proposed hybrid model persistence.
 
 \begin{table} [ht]
     \centering
@@ -260,16 +258,24 @@ A new approach is required to maintain the benefits of both approaches with acce
         Versioning & $+$ & $-$ & $+$ \\
         \hline 
     \end{tabular}
-\flushright
-\tiny
-$^*$state-based persistence with big data backend
+    \flushright
+    \tiny
+    $^*$state-based persistence with big data backend
 \end{table}
+
+A new approach is required to maintain the benefits of both approaches with acceptable trade-off. Thus, we proposed a hybrid model persistence -- an approach that uses change and state-based persistence side-by-side to persist models. One notable drawback for this persistence is it requires more storage space since models are saved into two types of persistence. Table \ref{table:persistence_comparsion} summarises the benefits and drawbacks of the change and state-based model persistence and the potential benefits and drawbacks of the proposed hybrid model persistence.
 
 \section{Hybrid Model Persistence}
 \label{sec:hybrid_model_persistence}
-Hybrid model persistence is essentially combines two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified, the occurred changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. In terms of loading, the model is directly loaded from the state-based representation. Thus, replaying all the changes from its change-based representation -- which is time consuming -- to get the last state of the model can be avoided.
+Hybrid model persistence is essentially combines two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified by a client, the occurred changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. Changes persisted into the change-based representation are fully derived from the changes happened on the state-based representation. Since the change-based representation is text-based, it can be stored in a version control repository. In terms of querying (including loading), the model is directly queried from the state-based representation. Thus, replaying all the changes from its change-based representation to get the last state of the model -- which is time consuming -- can be avoided. This mechanism of the hybrid model persistence is presented in Fig. \ref{fig:hybrid_persistence}.
 
-These ideas are then translated into an inplementation that conforms to metamodelling architectures such as MOF \cite{omg2018mof} and EMF \cite{steinberg2008emf}. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with two state-based persistence implementations, NeoEMF \cite{daniel2016neoemf} and XMI \cite{omg2018xmi}. They are selected because NeoEMF is the recent work that integrates agnostic big data backend to the EMF metamodelling architectures for handling large model persistence, and XMI is the common standard format for persisting EMF models. The design of our implementation follows the class diagram presented in Fig. \ref{fig:class_diagram}. 
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/hybrid_persistence}
+    \caption{The mechanism of the hybrid model persistence.}
+    \label{fig:hybrid_persistence}
+\end{figure}
+
+These ideas are then translated into an inplementation that conforms to metamodelling architectures such as MOF \cite{omg2018mof} and EMF \cite{steinberg2008emf}. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with two state-based persistence implementations, NeoEMF \cite{daniel2016neoemf} and XMI \cite{omg2018xmi}. They are selected because NeoEMF is the recent work that integrates agnostic big data backend to the EMF metamodelling architectures for handling large-scale model persistence, and XMI is the common standard format for persisting EMF models. The core components of the implementation of the hybrid model persistence are presented in a class diagram in Fig. \ref{fig:class_diagram}. 
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/class_diagram}
@@ -279,73 +285,9 @@ These ideas are then translated into an inplementation that conforms to metamode
 
 The Epsilon CBP provides a $ChangeEventAdapter$ class, and derived $EContentAdapter$ adapter class that collects changes made to a model in the form of a list of events ($changeEvents$). Based on this class, we derives another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter class for NeoEMF and the $ChangeHybridXMIEventAdapater$ for XMI. These classes override the $notifyChanged(Notification)$ that belongs to the $ChangeEventAdapter$ class to handle events that are specific to NeoEMF and XMI respectively. 
 
-We also create a resource class for hybrid persistence, the $HybridResource$ class. The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence (e.g. NeoEMF and XMI). The $HybridResource$ class contains the $stateBasedResource$ field which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ field that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former can access the events collected by the latter, and the latter can also use functionalities provided by the former (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
+We also create a resource class for hybrid persistence, the $HybridResource$ class (a resource class is a class dedicated to interact with a persistence, e.g. save, load, get contents). The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence (e.g. NeoEMF and XMI). The $HybridResource$ class contains the $stateBasedResource$ field which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ field that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former can access the events collected by the latter, and the latter can also use functionalities provided by the former (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
 
 The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, and $HybridXMIResource$$Impl$ class for XMI. Both are derived from the $HybridResource$. For $HybridNeoEMFResourceImpl$ , this class also implements the NeoEMF's $HybridPersistence$ interface so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a backend database). 
-
-Inside the $HybridNeoEMFResourceImpl$'s constructor, a $HybridChangeEventAdapater$ is registered to the NeoEMF resource's $eAdapters$ in order for the adapter can listen to changes (Fig. \ref{lst:attach_adapater_neo}). The same procedure is also applied to XMI in order for the adapter to work (Fig. \ref{lst:attach_adapater_xmi}). 
-
-\begin{lstlisting}[style=java,caption={A simplified code to connect a change-based model persistence's event adapater to a NeoEMF resource.},label=lst:attach_adapater_neo]
-public HybridNeoEMFResourceImpl(PersistentResource persistentResource, OutputStream outputStream) throws IOException {
-    ...
-    this.stateBasedResource = persistentResource;
-    hybridChangeEventAdapter = new HybridNeoEMFChangeEventAdapter(this);
-    stateBasedResource.eAdapters().add(hybridChangeEventAdapter);
-    ...
-}
-\end{lstlisting}
-
-\begin{lstlisting}[style=java,caption={A simplified code to connect a change-based model persistence's event adapater to an XMI resource.},label=lst:attach_adapater_xmi]
-public HybridXMIResourceImpl(Resource resource, OutputStream outputStream) throws IOException {
-...
-this.stateBasedResource = resource;
-hybridChangeEventAdapter = new HybridXMIChangeEventAdapter(this);
-stateBasedResource.eAdapters().add(hybridChangeEventAdapter);
-...
-}
-\end{lstlisting}
-
-Basically, the hybrid model persistence only executes the code in List. \ref{lst:hybrid_load_neo} to load a model. It overrides the $load$ method of the $ResourceImpl$ class (line 1-2) and executes the load method of the NeoEMF resource (line 4). The same steps also apply to hybrid model persistence with XMI resource, except that it overrides the $doLoad$ method of the $ResourceImpl$, in order to load properly (List. \ref{lst:hybrid_load_xmi}). 
-
-\begin{lstlisting}[style=java,caption={The simplified $load$ method of the hybrid model persistence with NeoEMF as its state-based resource.},label=lst:hybrid_load_neo]
-@Override
-public void load(Map<?, ?> options) throws IOException {
-    ... 
-    stateBasedResource.load(options);
-    ...
-}
-\end{lstlisting}
-
-\begin{lstlisting}[style=java,caption={The simplified $load$ method of the hybrid model persistence with XMI as its state-based resource.},label=lst:hybrid_load_xmi]
-@Override
-public void doLoad(Map<?, ?> options) throws IOException {
-    ... 
-    stateBasedResource.load(options);
-    ...
-}
-\end{lstlisting}
-
-In saving a model, the  $HybridNeoEMFResourceImpl$ and $HybridXMIResourceImpl$ overrides the $save$ and $doSave$ method of the $ResourceImpl$ class (List. \ref{lst:hybrid_save_neo} and \ref{lst:hybrid_save_xmi}, line 1-2). Inside both methods, both resources execute the $save$ method of their state-based persistence (line 4) and execute the $saveChangeBasedPersitence$ method to save changes made to a model to a change-based representation represented by the $cbpOutputStream$.
-
-\begin{lstlisting}[style=java,caption={A simplified code to save a model to both state and change-based representation of the hybrid model persistence.},label=lst:hybrid_save_neo]
-@Override
-public void save(Map<?, ?> options) throws IOException {
-    ...
-    stateBasedResource.save(options);
-    saveChangeBasedPersistence(cbpOutputStream, options);
-    ...
-}
-\end{lstlisting}
-
-\begin{lstlisting}[style=java,caption={A simplified code to save a model to both state and change-based representation of the hybrid model persistence.},label=lst:hybrid_save_xmi]
-@Override
-public void doSave(Map<?, ?> options) throws IOException {
-    ...
-    stateBasedResource.save(options);
-    saveChangeBasedPersistence(cbpOutputStream, options);
-    ...
-}
-\end{lstlisting}
 
 \section{Evaluation}
 \label{sec:evaluation}
@@ -469,9 +411,9 @@ The subtle drawbacks of hybrid model persistence is that it consumes more memory
 
 \section{Related Work}
 \label{sec:related_work}
- Change-based persistence-like approach has been used widely in many incremental projects (e.g IncQuery \cite{DBLP:conf/ecmdafa/RathHV12}, ReactiveATL \cite{DBLP:conf/ecmdafa/OgunyomiRK15}) usually by harnessing the notification facilities that already provided by the platform (e.g. Eclipse). It is also has been applied in other artefacts, such as software \cite{DBLP:journals/entcs/RobbesL07}, database \cite{DBLP:conf/sde/LippeO92}, hierarchical documents \cite{DBLP:conf/caise/IgnatN05}, model repository and version control \cite{koegel2010emfstore}. The approach is claimed faster for detecting changes \cite{DBLP:conf/edoc/KoegelHLHD10}, more accurate and carries semantic information \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,mens2002state}, faster and more accurate for comparison and merging \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,koegel2010emfstore}, and information carried is useful for analytics \cite{DBLP:journals/entcs/RobbesL07}.
+Change-based persistence-like approach has been used widely in many incremental projects (e.g IncQuery \cite{DBLP:conf/ecmdafa/RathHV12}, ReactiveATL \cite{DBLP:conf/ecmdafa/OgunyomiRK15}) usually by harnessing the notification facilities that already provided by the platform (e.g. Eclipse). It is also has been applied in other artefacts, such as software \cite{DBLP:journals/entcs/RobbesL07}, database \cite{DBLP:conf/sde/LippeO92}, hierarchical documents \cite{DBLP:conf/caise/IgnatN05}, model repository and version control \cite{koegel2010emfstore}. The approach is faster for detecting changes \cite{DBLP:conf/edoc/KoegelHLHD10}, more accurate and carries semantic information \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,mens2002state}, faster and more accurate for comparison and merging \cite{DBLP:conf/sde/LippeO92,DBLP:conf/caise/IgnatN05,koegel2010emfstore}, and information carried is useful for analytics \cite{DBLP:journals/entcs/RobbesL07}.
 
- There are several non-XMI approaches to state-based model persistence, using relational or NoSQL databases. For example, EMF Teneo\,\cite{eclipse2017teneo} persists EMF models in relational databases, while Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} persist models in document and graph databases, respectively.  None of these approaches provides built-in support for versioning and models are eventually stored in binary files/folders which are known to be a poor fit for text-oriented version control systems like Git and SVN. Connected Data Objects (CDO) \cite{eclipse2017cdo}, provides support for database-backed model persistence as well as collaboration facilities, but its adoption necessitates the use of a separate version control system in the software development process (e.g. a Git repository for code and a CDO repository for models), which introduces fragmentation and administration challenges \cite{barmpis2014evaluation}. Similar challenges arise in relation to other model-specific version control systems such as EMFStore\,\cite{koegel2010emfstore}.
+There are several non-XMI approaches to state-based model persistence, using relational or NoSQL databases. For example, EMF Teneo\,\cite{eclipse2017teneo} persists EMF models in relational databases, while Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} persist models in document and graph databases, respectively.  None of these approaches provides built-in support for versioning and models are eventually stored in binary files/folders which are known to be a poor fit for text-oriented version control systems like Git and SVN. Connected Data Objects (CDO) \cite{eclipse2017cdo}, provides support for database-backed model persistence as well as collaboration facilities, but its adoption necessitates the use of a separate version control system in the software development process (e.g. a Git repository for code and a CDO repository for models), which introduces fragmentation and administration challenges \cite{barmpis2014evaluation}. Similar challenges arise in relation to other model-specific version control systems such as EMFStore\,\cite{koegel2010emfstore}.
 
 \section{Conclusions and Future Work}
 \label{sec:conlcusions_and_future_work}
@@ -579,14 +521,14 @@ For our future work, we plan to evaluate the hybrid model persistence on big mod
 
 
 % use section\\ for acknowledgment
-\section*{Acknowledgments}
+\section*{Acknowledgment}
 This research is part of a doctoral programme funded by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
 
 % trigger a \newpage just before the given reference
 % number - used to balance the columns on the last page
 % adjust value as needed - may need to be readjusted if
 % the document is modified later
-%\IEEEtriggeratref{8}
+%\IEEEtriggeratref{30}
 % The "triggered" command can be changed if desired:
 %\IEEEtriggercmd{\enlargethispage{-5in}}
 
