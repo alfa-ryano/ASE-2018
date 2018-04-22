@@ -116,7 +116,7 @@
 
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
-
+\newcommand{\dk}[1]{\textbf{[Dimitris: #1]}}
 
 \begin{document}
 %
@@ -204,20 +204,18 @@ The rest of the paper is structured as follows. Section \ref{sec:change_and_stat
 
 \section{Change and State-based Model Persistence}
 \label{sec:change_and_state_based_model_persistence}
-To explain the concept of change-based model persistence, we use two versions of a UML2 \cite{eclipse2017uml2} model persisted in the state-based XMI format: the first one is the initial version when the model is created (List. \ref{lst:xmimodel1}), and the second one is when the model has been modified (Fig. \ref{lst:xmimodel2}). In the first session when creating the first version of the model, a package is created and its name is set to ``X''. Two classes also created and their names are set to ``A'' and ``B''. Both classes are then added to the package. The model is then saved and produces a state-based model as presented in List. \ref{lst:xmimodel1}. In the second session, the model is modified by renaming the class `B'' to ``C'' and removing the class ``A'' from its package and deleting it entirely from the model. After that, the model is saved again to produce the second version of the model as presented in List. \ref{lst:xmimodel2}. The visual illustration of these series of modification is depicted in Fig. \ref{fig:illustration_cbp}.
+To explain the concept of change-based model persistence, we use two successive versions of a UML2 \cite{eclipse2017uml2} model persisted in the state-based XMI format: the first one is the initial version (List. \ref{lst:xmimodel1}), and the second one is the update version (Fig. \ref{lst:xmimodel2}). To construct the first version of the model, a package is created and its name is set to ``X''. Two classes also created and their names are set to ``A'' and ``B''. Both classes are then added to the package. The model is then saved and produces a state-based model as presented in List. \ref{lst:xmimodel1}. In the second session, the model is modified by renaming the class `B'' to ``C'' and removing the class ``A'' from its package and deleting it entirely from the model. After that, the model is saved again to produce the second version of the model as presented in List. \ref{lst:xmimodel2}. The visual illustration of these series of modification is depicted in Fig. \ref{fig:illustration_cbp}.
 
-\begin{lstlisting}[style=xmi,caption={The first version of the UML2 example model in XMI format after the first session.},label=lst:xmimodel1]
-<?xml version="1.0" encoding="ASCII"?>
+\begin{lstlisting}[style=xmi,caption={The initial version of the UML2 example model in (simplified) XMI.},label=lst:xmimodel1]
 <uml:Package xmi:id="1" name="X">
-<packagedElement xsi:type="uml:Class" xmi:id="2" name="A"/>
-<packagedElement xsi:type="uml:Class" xmi:id="3" name="B"/>
+    <packagedElement xsi:type="uml:Class" xmi:id="2" name="A"/>
+    <packagedElement xsi:type="uml:Class" xmi:id="3" name="B"/>
 </uml:Package>
 \end{lstlisting}
 
-\begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model in XMI format after the second session.},label=lst:xmimodel2]
-<?xml version="1.0" encoding="ASCII"?>
+\begin{lstlisting}[style=xmi,caption={The second version of the UML2 example model.},label=lst:xmimodel2]
 <uml:Package xmi:id="1" name="X">
-<packagedElement xsi:type="uml:Class" xmi:id="3" name="C"/>
+    <packagedElement xsi:type="uml:Class" xmi:id="3" name="C"/>
 </uml:Package>
 \end{lstlisting}
 
@@ -283,9 +281,7 @@ To explain the concept of change-based model persistence, we use two versions of
     \label{fig:illustration_cbp}
 \end{figure}
 
-
-
-Change-based model persistence, instead of saving the state of a model, save the changes made to a model in the form of a list of events. These events are collected in memory and appended into a change-based file when the model is saved. Since only the changes are persisted, not the entire elements of a model, it can speed up model saving specifically in the context of large models. The series of changes made to the example model in both sessions can be seen in a text-formatted, change-based persistence presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted change events have to be replayed again -- simulating the construction of the model from the beginning.
+In change-based model persistence, instead of saving the state of the model, all the changes made to it are saved instead. Change events are collected in memory during model editing and are appended into a change-based log file when the model is saved. The changes made to the example model in both sessions can be seen in a text-based (for demonstration purposes), change-based format presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted change events have to be replayed -- reenacting the construction of the model from the beginning.
 
 \begin{lstlisting}[style=eol,caption={The text change-based persistence of both versions in List. \ref{lst:xmimodel1} and \ref{lst:xmimodel2}. The visual illustration can be been in Fig. \ref{fig:illustration_cbp}.},label=lst:cbpmodel]
 session 1
@@ -303,39 +299,35 @@ remove c1 from p1.children
 delete c1
 \end{lstlisting}
 
+Comparing and finding the differences between two versions of a state-based model is an expensive ($O(N^2)$ in the general case) operation and beyond change visualisation and comprehension, this also has a substantial impact to downstream activities such as incremental model transformation \cite{DBLP:conf/ecmdafa/OgunyomiRK15} and validation.
 
+By contrast, in change-based persistence, changes are first-class entities in the persisted model file and as such, model comparison and differencing is relatively inexpensive (more on this in Sec. \ref{sec:evaluation}). The main downsides of change-based persistence are ever-growing model file sizes \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/edoc/KoegelHLHD10} and ever-increasing loading times \cite{mens2002state}. Even thought an attempt has been made to reduce the loading time \cite{yohannis2018towards} by detecting, memoising and subsequently ignoring change events that have no impact to the final state of the model (i.e. that have been superseded by other events), loading time can only be reduced up to around 50\%, and is still substantially longer than that of state-based approaches. 
 
+Table \ref{table:persistence_comparsion} summarises the benefits (+) and drawbacks (-) of change and state-based model persistence.
 
-
-While finding the differences between the first version and the second version of the model can be very quick since the the size of the model is very small, the task can be expensive for large models. Detecting changes can be time consuming since comparison has to be made element-to-element, element-by-element to identify the differences between two versions of a model. In change-based persistence, information about the changed elements between a version and its previous versions is already contained in the persistence. Thus, the information can be potentially used to speed up model change detection and comparison. Change-based-like approach also has been used for rapid incremental model management, such as the incremental query for derived features of EMF \cite{DBLP:conf/ecmdafa/RathHV12} and incremental model-to-text transformation \cite{DBLP:conf/ecmdafa/OgunyomiRK15}.
-
-On contrary, change-based approach also comes disadvantages. It is increased in record size \cite{DBLP:journals/entcs/RobbesL07,DBLP:conf/edoc/KoegelHLHD10} and not efficient for replaying (loading)  long records \cite{mens2002state}. Even thought an attempt has been made to reduce the loading time \cite{yohannis2018towards}, it can only be reduced up to around 50\%, and it still cannot outperformed loading a model from a state-based format. On the other hand, state-based model persistence is growing on its capabilities to process large-scale models by harnessing the power of big data backend. Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} has been able to load and query models with more than a million elements since they are able to handle model's elements partially without having to load all the elements into memory when using the standard XMI persistence. However, using these backends hindered the models to be versioned on common version control systems (e.g. Git, SVN), which is crucial for collaborative development.
+% On the other hand, state-based model persistence is growing on its capabilities to process large-scale models by harnessing the power of big data backend. Morsa \cite{DBLP:conf/models/Espinazo-PaganCM11} and NeoEMF \cite{daniel2016neoemf} has been able to load and query models with more than a million elements since they are able to handle model's elements partially without having to load all the elements into memory when using the standard XMI persistence. However, using these backends hindered the models to be versioned on common version control systems (e.g. Git, SVN), which is crucial for collaborative development.
 
 \begin{table} [ht]
     \centering
-    \caption{Comparison of model persistence: the potential benefits and drawbacks of the proposed hybrid model persistence for model processing.}
+    \caption{Comparison of model persistence approaches.}
     \label{table:persistence_comparsion}
     \begin{tabular}{ c c c c }
         \hline 
-        \textbf{Dimensions} & \textbf{Change-based} & \textbf{State-based$^*$} & \textbf{Hybrid} \\
+        \textbf{Dimensions} & \textbf{Change-based} & \textbf{State-based} \\
         \hline 
-        Load Time & $-$ & $+$ & $+$  \\
-        Save Time & $+$ & $+$ & $+$ \\
-        Comparison & $+$ & $-$ & $+$ \\
-        Storage & $-$ & $+$ & $-$ \\
-        Versioning & $+$ & $-$ & $+$ \\
+        Load Time & $-$ & $+$ \\
+        Save Time & $+$ & $-$ \\
+        Comparison Time & $+$ & $-$ \\
+        Storage Space & $-$ & $+$ \\
         \hline 
     \end{tabular}
-    \flushright
-    \tiny
-    $^*$state-based persistence with big data backend
 \end{table}
 
-A new approach is required to maintain the benefits of both approaches with acceptable trade-off. Thus, we proposed a hybrid model persistence -- an approach that uses change and state-based persistence side-by-side to persist models. One notable drawback for this persistence is it requires more storage space since models are saved into two types of persistence. Table \ref{table:persistence_comparsion} summarises the benefits and drawbacks of the change and state-based model persistence and the potential benefits and drawbacks of the proposed hybrid model persistence.
+% A new approach is required to combine the benefits (+) of both approaches (fast loading and comparison) with acceptable trade-off. Thus, we proposed a hybrid model persistence -- an approach that uses change and state-based persistence side-by-side to persist models. One notable drawback for this persistence is it requires more storage space since models are saved into two types of persistence. 
 
 \section{Hybrid Model Persistence}
 \label{sec:hybrid_model_persistence}
-Hybrid model persistence is essentially combines two types of persistence, change-based and state-based model persistence, to work together side-by-side. When a model is modified by a client, the occurred changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. Changes persisted into the change-based representation are fully derived from the changes happened on the state-based representation. Since the change-based representation is text-based, it can be stored in a version control repository. In terms of querying (including loading), the model is directly queried from the state-based representation. Thus, replaying all the changes from its change-based representation to get the last state of the model -- which is time consuming -- can be avoided. This hybrid model persistence's mechanism is presented in Fig. \ref{fig:hybrid_persistence}.
+To achieve the best of both worlds we introduce a hybrid model persistence approach which combines change-based and state-based model persistence, to work together side-by-side. An overview of the proposed approach is illustrated in Fig. \ref{fig:hybrid_persistence}.
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/hybrid_persistence}
@@ -343,7 +335,26 @@ Hybrid model persistence is essentially combines two types of persistence, chang
     \label{fig:hybrid_persistence}
 \end{figure}
 
-These ideas are then translated into an inplementation that conforms to metamodelling architectures such as MOF \cite{omg2018mof} and EMF \cite{steinberg2008emf}. The work is derived from an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, and augmented with two state-based persistence implementations, NeoEMF \cite{daniel2016neoemf} and XMI \cite{omg2018xmi}. They are selected because NeoEMF is the recent work that integrates agnostic big data backend to the EMF metamodelling architectures for handling large-scale model persistence, and XMI is the common standard format for persisting EMF models. The core components of the implementation of the hybrid model persistence are presented in a class diagram in Fig. \ref{fig:class_diagram}. 
+In the proposed approach a \textit{hybrid} model is stored in two representations at the same time: a change-based (e.g. using CBP) and a state-based representation (e.g. using XMI or a database-backed approach such as NeoEMF). Of these representations, the change-based one is the source of truth and the state-based representation is fully derived from the former.
+
+\paragraph{Loading a hybrid model}: Models are loaded into in-memory object graphs that clients (e.g. editors, transformations) can then interact with\footnote{Depending on the state persistence mechanism, the object graph may be loaded in its entirety at startup (e.g. XMI) or it can be loaded progressively and in a lazy manner (e.g. NeoEMF/CDO)}. In the proposed hybrid approach, if the state-based counterpart already exists, the in-memory object graph is populated from it; otherwise it is populated by replaying the complete editing history recorded in the change-based representation.
+
+\paragraph{Changing a hybrid model}: When an element of a loaded model is created, modified or deleted, the change is applied to the in-memory object graph and is also recorded in an in-memory list of changes. We use the term \emph{editing session} for the period between loading a model and saving back to disk. 
+
+\paragraph{Saving a hybrid model}: The current version of the in-memory object graph is stored in the preferred state-based representation, and the list of changes recorded in the current editing session is optionally compacted to remove superseded changes and appended to the change-based representation.
+
+\paragraph{Versioning a hybrid model}: Since the state-based representation is fully derived from the change-based representation, if a model needs to be versioned (e.g. in a Git repository), only the change-based representation needs to be stored in the repository. The first time it is loaded after being checked out/cloned, the state-based representation will be computed and persisted locally and will be used in subsequent model loading steps.
+
+\paragraph{Comparing hybrid models}: To compare two hybrid models, their change-based representations are used since, as discussed above, this is much more efficient than state-based comparison.
+
+% When a model is modified by a client (e.g. editor, transformation program), the changes are recorded into both representations. The former persists all the changes to keep the model's history, while the latter is used to record the last state of the model produced by the changes. Changes persisted into the change-based representation are fully derived from the changes happened on the state-based representation. Since the change-based representation is text-based, it can be stored in a version control repository. In terms of querying (including loading), the model is directly queried from the state-based representation. Thus, replaying all the changes from its change-based representation to get the last state of the model -- which is time consuming -- can be avoided. This hybrid model persistence's mechanism is presented in Fig. \ref{fig:hybrid_persistence}.
+
+\section{Implementation}
+\label{sec:implementation}
+
+We have implemented the proposed hybrid model persistence approach in a prototype on top of the Eclipse Modeling Framework (EMF) \cite{steinberg2008emf}. The prototype makes use of an existing implementation of change-based model persistence, the Epsilon CBP \cite{DBLP:conf/models/YohannisKP17}, augmented with two state-based persistence implementations: NeoEMF \cite{daniel2016neoemf} and XMI \cite{omg2018xmi}.
+
+XMI has been selected as a standard state-based model persistence format (natively supported by EMF), and NeoEMF as a best-of-breed representative of database-backed state-based model persistence frameworks. The core components of the prototype are presented in a class diagram in Fig. \ref{fig:class_diagram}. 
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/class_diagram}
@@ -351,11 +362,15 @@ These ideas are then translated into an inplementation that conforms to metamode
     \label{fig:class_diagram}
 \end{figure}
 
-The Epsilon CBP provides a $ChangeEventAdapter$ class \cite{DBLP:conf/models/YohannisKP17} that is derived from the Ecore's $EContentAdapter$ adapter class \cite{eclipse2018eContentAdapter}. This class collects changes made to a model in the form of a list of events ($changeEvents$). Based on this class, we derives another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter class for NeoEMF and the $ChangeHybridXMIEventAdapater$ for XMI. These classes override the $notifyChanged(Notification)$ that belongs to the $ChangeEventAdapter$ class to handle events that are specific to NeoEMF and XMI respectively. 
+The Epsilon CBP provides a $ChangeEventAdapter$ class \cite{DBLP:conf/models/YohannisKP17} that is derived from the Ecore's $EContentAdapter$ adapter class \cite{eclipse2018eContentAdapter}. This class collects changes made to the in-memory object graph of an EMF model in the form of a list of events ($changeEvents$). Based on this class, we derived another adapter class, $ChangeHybridEventAdapter$, for the hybrid model persistence implementation. It is an abstract class so that it can be further derived to create different implementations of adapter classes for different types of state-based persistence. The $ChangeHybridNeoEMFEventAdapater$ is the adapter class for NeoEMF and the $ChangeHybridXMIEventAdapater$ for XMI. These classes override the $notifyChanged(Notification)$ that belongs to the $ChangeEventAdapter$ class to handle events that are specific to NeoEMF and XMI respectively.
 
-We also create a resource class for hybrid persistence, the $HybridResource$ class (a resource class is a class dedicated to interact with a persistence, e.g. save, load, get contents), derived from the Ecore's $ResourceImpl$ \cite{eclipse2018resourceImpl}. The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence (e.g. NeoEMF and XMI). The $HybridResource$ class contains the $stateBasedResource$ field which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ field that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former can access the events collected by the latter, and the latter can also use functionalities provided by the former (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
+We also created a resource class for hybrid persistence, the $HybridResource$ class (a resource class is a class dedicated to interact with a persistence, e.g. save, load, get contents), derived from the Ecore's $ResourceImpl$ \cite{eclipse2018resourceImpl}. The class is made abstract so that it can be realised in different resource implementation classes for different state-based persistence (e.g. NeoEMF and XMI). The $HybridResource$ class contains the $stateBasedResource$ field which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ field that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. This $HybridResource$ class has an association with the $HybridChangeEventAdapater$ class so that the former can access the events collected by the latter, and the latter can also use facilities provided by the former (e.g. getting the id of an element in the resource, saving changes to a change-based model representation).
 
-The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, and $HybridXMIResource$$Impl$ class for XMI. Both are derived from the $HybridResource$. For $HybridNeoEMFResourceImpl$ , this class also implements the NeoEMF's $PersistenceResource$ interface \cite{atlanmod2018persistentResource} so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a backend database). 
+The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, and $HybridXMIResource$$Impl$ class for XMI. Both are derived from the $HybridResource$. For $HybridNeoEMFResourceImpl$ , this class also implements the NeoEMF's $PersistenceResource$ interface \cite{atlanmod2018persistentResource} so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a backend database). The complete implementation is available under \url{https://github.com/epsilonlabs/emf-cbp}.
+
+\subsection{Known Limitations}
+
+\dk{TODO: Discuss subset of Ecore covered, only support for single-file models, no support for detection should the state-based and change-based representations fall out of sync etc.}
 
 \section{Evaluation}
 \label{sec:evaluation}
