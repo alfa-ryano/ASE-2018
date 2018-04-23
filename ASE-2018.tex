@@ -58,6 +58,7 @@
 % manually specify the path to it like:
 % \documentclass[conference]{../sty/IEEEtran}
 
+\usepackage{makecell}
 \usepackage[noadjust]{cite}
 \usepackage{graphicx}
 	\graphicspath{{images/}} 
@@ -488,7 +489,33 @@ For the Epsilon project, we have successfully generated its CBP from version 1 u
 
 \subsection{Change Detection}
 \label{sec:change_detection}
+In this section, we present the the evaluation of change-based persistence, as a component of the hybrid model persistence, on faster model change detection. In this evaluation, we used four versions of the the Epsilon project's UML2 model: committed version 8, 44, 181, and 388. Table \ref{table:version_description} shows their description.
 
+\begin{table}[ht]
+    \centering
+    \caption{Description of version 8, 44, 181, and 388 of the Epsilon project's UML2 model.}
+    \label{table:version_description}
+    \begin{tabular}{ r r r r r}
+        \hline 
+         \textbf{\thead{Versions}} & \textbf{\thead{Element\\Counts}} & \textbf{\thead{Delta Elements\\(from ver. 8)}} & \textbf{\thead{Event\\Counts}} & \textbf{\thead{Delta Events\\(from ver. 8)}}  \\
+        \hline 
+        8	& 25,993 & 0	& 90,888 & 0\\
+        44	& 31,240 & 5,247	& 16,6659 & 75,771\\
+        181	& 34,196 & 8,203	& 25,0073 & 159,185\\
+        388	& 48,482 & 22,489 & 33,2315 & 241,427\\
+        \hline 
+    \end{tabular}
+\end{table}
+
+As the scenario for the evaluation, we wanted to identify which elements in the older model (the left-side model) that did not exist any more in the newer model (right-side model). Thus, we paired up model version 8 to 44, 8 to 181, and 8 to 383, and used them as dataset. We used two methods to identify the deleted elements. First, we iterated through events in the change-based persistence of a hybrid-model persistence to identify them (\emph{the hybrid method}). Second, we performed model-to-model comparison between the two states of the paired versions using EMF Compare to identify the deleted elements (\emph{the state-based method}). We compared both methods on the the time they required to identify all the deleted elements. We performed measurement 22 times for each pair and method to calculate the time. Fig. \ref{fig:delete_detection_epsilon_average} shows the result of the comparison. 
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/delete_detection_epsilon_average}
+    \caption{The time required for hybrid and state-based methods on detecting older version's elements that do not exist in newer versions.}
+    \label{fig:delete_detection_epsilon_average}
+\end{figure}
+
+On the 008 vs. 044 pair, the state-based method ($mean$ = 10.81 , $sd$ = 0.16 seconds) completes the change detection 3.47 seconds faster than the hybrid method ($mean$ = 14.28, $sd$ = 0.36 seconds), while on the 008 vs. 181 pair, the hybrid method ($mean$ = 28.62 , $sd$ = 0.17 seconds)  performs better, 44.07 seconds faster, than the state-based method ($mean$ = 72.69, $sd$ = 1.28 seconds). The hybrid method considerably outperforms the state-based method on the 008 vs. 388 pair. The hybrid method ($mean$ = 42.93, $sd$ = 0.18 seconds) is 234.84 seconds faster than the change-based method ($mean$ = 277.77, $sd$ = 4.70 seconds). Considering the increasing number of elements and events in Table \ref{table:version_description}, the change identification time of the hybrid method tends to grow linearly as the number of events increases, which is an advantage for faster change detection, compared to the stated-based method that tends to grow exponentially as the number of elements increases.
 
 \subsection{Threats to Validity and Limitations}
 \label{sec:threats_to_validity_and_limitations}
