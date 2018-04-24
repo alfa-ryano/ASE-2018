@@ -401,26 +401,74 @@ We repeated our experiments 22 times for each dimension measured. The results of
 
 \subsection{Loading Time and Memory Footprint}
 \label{sec:model_loading_time}
+In this section, we present the results of our evaluation on the time and memory footprint required for the hybrid model persistence to load a model.
+
+\subsubsection{Epsilon Project}
+\label{sec:model_loading_time_epsilon}
 
 \begin{figure}[ht]
         \includegraphics[width=\linewidth]{images/load_time_epsilon}
-    \caption{Hybrid vs. state-based model persistence on model loading time.}
+    \caption{Hybrid vs. state-based model persistence on model loading time for the Epsilon project.}
             \label{fig:load_time_epsilon}
 \end{figure}
 
 \begin{figure}[ht]
         \includegraphics[width=\linewidth]{images/load_memory_epsilon}
         \caption{loading memory footprint}
-    \caption{Hybrid vs. state-based model persistence on the memory footprint of loading a model.}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of loading a model for the Epsilon project.}
 \label{fig:load_memory_epsilon}
 \end{figure}
 
-In this section, we present the results of our evaluation on the time (Fig. \ref{fig:load_time_epsilon}) and memory footprint (Fig. \ref{fig:load_memory_epsilon}) for the hybrid model persistence to load a model. The model used for testing is the UML2 model of the Epsilon project that consists of 88,020 elements (the model is derived from the committed version number 940 from its Git repository). The results shows that the average loading time of Hybrid NeoEMF ($mean$ = 0.292, $sd$ = 0.061 seconds) is slightly slower than NeoEMF ($mean$ = 0.279, $sd$ = 0.023 seconds) but insignificant ($t$ = -0.97, $df$ = 26.94, $p$-value = 0.34). The slowdown is more significant ($t$ = -29.37, $df$ = 27.38, $p$-value $<$ 0.05) on Hybrid Hybrid XMI ($mean$ = 0.873, $sd$ = 0.038 seconds) vs. XMI ($mean$ = 0.616, $sd$ = 0.015 seconds) but still in the order of less than 0.3 seconds.  
+The model used for testing is the UML2 model of the Epsilon project that consists of 88,020 elements (the model is derived from the committed version number 940 from its Git repository). The results shows that the average loading time of Hybrid NeoEMF ($mean$ = 0.292, $sd$ = 0.061 seconds) is slightly slower than NeoEMF ($mean$ = 0.279, $sd$ = 0.023 seconds) but insignificant ($t$ = -0.97, $df$ = 26.94, $p$-value = 0.34). The slowdown is more significant ($t$ = -29.37, $df$ = 27.38, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.873, $sd$ = 0.038 seconds) vs. XMI ($mean$ = 0.616, $sd$ = 0.015 seconds) but still in the order of less than 0.3 seconds.  
 
 For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 39, $sd$ = 0.9 MBs) uses more memory than NeoEMF ($mean$ = 10, $sd$ = 1.1 MBs) significantly ($t$ = -94.6, $df$ = 38.4, $p$-value $<$ 0.05). The similar significant increase on memory footprint ($t$ = -38131, $df$ = 25.8, $p$-value $<$ 0.05) also applies to Hybrid XMI ($mean$ = 12.8, $sd$ = 0.0 MBs) vs. XMI ($mean$ = 5.2, $sd$ = 0.0 MBs) when loading the model.  
 
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/load_time_bpmn2}
+    \caption{Hybrid vs. state-based model persistence on model loading time for the BPMN2 project.}
+    \label{fig:load_time_bpmn2}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/load_memory_bpmn2}
+    \caption{loading memory footprint}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of loading a model for the BPMN2 project.}
+    \label{fig:load_memory_bpmn2}
+\end{figure}
+
+
+\subsubsection{BPMN2 Project}
+\label{sec:model_loading_time_bpmn2}
+We also perform the same evaluation on the UML2 model of the BPMN2 project that consists of 62,062 elements (the model is derived from the committed version number 192 from its Git repository). For this model, the results shows that the average loading time of Hybrid NeoEMF ($mean$ = 0.308, $sd$ = 0.071 seconds) is slightly slower than NeoEMF ($mean$ = 0.286, $sd$ = 0.025 seconds) but insignificant ($t$ = -1.39, $df$ = 26.10, $p$-value = 0.18). The slowdown is more significant ($t$ = -6.85, $df$ = 41.97, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.212, $sd$ = 0.016 seconds) vs. XMI ($mean$ = 0.179, $sd$ = 0.016 seconds) but still in the order of less than 0.04 seconds.  
+
+For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 40.78, $sd$ = 1.29 MBs) uses more memory than NeoEMF ($mean$ = 27.20, $sd$ = 1.05 MBs) significantly ($t$ = -38.3, $df$ = 40.25, $p$-value $<$ 0.05). However, the increase of memory footprint is insignificant ($t$ = -0.42, $df$ = 27.79, $p$-value $<$ 0.68) for Hybrid XMI ($mean$ = 6.73374, $sd$ = 1.29305 MBs) vs. XMI ($mean$ = 6.73367, $sd$ = 0.00056 MBs) when loading the model.  
+
+\subsubsection{Wikipedia Article}
+\label{sec:model_loading_time_wikipedia}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/load_time_wikipedia}
+    \caption{Hybrid vs. state-based model persistence on model loading time for the Wikipedia article.}
+    \label{fig:load_time_wikipedia}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/load_memory_wikipedia}
+    \caption{loading memory footprint}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of loading a model for the Wikipedia article.}
+    \label{fig:load_memory_wikipedia}
+\end{figure}
+
+We also perform the evaluation on the ModiscoXML model of the Wikipedia's United States article project that consists of 13,122 elements (the model is derived from the version number 10,187 of its online page). For this model, the results shows that the average loading time of Hybrid NeoEMF ($mean$ = 0.287, $sd$ = 0.028 seconds) is slightly slower than NeoEMF ($mean$ = 0.275, $sd$ = 0.001 seconds) but insignificant ($t$ = -1.11, $df$ = 35.84, $p$-value = 0.28). The slowdown is more significant ($t$ = -13.83, $df$ = 41.98, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.045, $sd$ = 0.001 seconds) vs. XMI ($mean$ = 0.040, $sd$ = 0.001 seconds) but still in the order of less than 0.01 seconds.  
+
+For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 35.91, $sd$ = 1.03 MBs) uses more memory than NeoEMF ($mean$ = 27.25, $sd$ = 0.54 MBs) significantly ($t$ = -34.83, $df$ = 31.56, $p$-value $<$ 0.05). A significant increase on memory footprint ($t$ = -1279.9, $df$ = 41.12, $p$-value $<$ 0.05) also happens on Hybrid XMI ($mean$ = 8.4079, $sd$ = 0.0008 MBs) vs. XMI ($mean$ = 8.0933, $sd$ = 0.0009 MBs) when loading the model.  
+
 \subsection{Model Saving Time and Memory Footprint}
 \label{sec:model_saving_time}
+In this section, we present the results our evaluation on the time and memory footprint for the hybrid model persistence to save a change made to the model.
+
+\subsubsection{Epsilon Project}
+\label{sec:model_saving_time_epsilon}
 
 \begin{figure}[ht]
     \includegraphics[width=\linewidth]{images/save_time_epsilon}
@@ -434,9 +482,47 @@ For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 39, $s
     \label{fig:save_memory_epsilon}
 \end{figure}
 
-In this section, we present the results our evaluation on the time (Fig. \ref{fig:load_time_epsilon}) and memory footprint (Fig. \ref{fig:load_memory_epsilon}) for the hybrid model persistence to save a change made to the model. Using the same UML2 model version 940 of the Epsilon project, the results shows that the average saving time for each change made to Hybrid NeoEMF ($mean$ = 0.0892, $sd$ = 0.0421 seconds) is slightly slower than the one made to NeoEMF ($mean$ = 0.0829, $sd$ = 0.0494 seconds) but insignificant ($t$ = -0.45, $df$ = 40.97, $p$-value = 0.65). The slowdown is more significant ($t$ = -2.5, $df$ = 36.1, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.411, $sd$ = 0.023 seconds) vs. XMI ($mean$ = 0.397, $sd$ = 0.015 seconds) but still in the order of less than 0.02 seconds.  
+Using the same UML2 model version 940 of the Epsilon project, the results shows that the average saving time for each change made to Hybrid NeoEMF ($mean$ = 0.0892, $sd$ = 0.0421 seconds) is slightly slower than the one made to NeoEMF ($mean$ = 0.0829, $sd$ = 0.0494 seconds) but insignificant ($t$ = -0.45, $df$ = 40.97, $p$-value = 0.65). The slowdown is more significant ($t$ = -2.5, $df$ = 36.1, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.411, $sd$ = 0.023 seconds) vs. XMI ($mean$ = 0.397, $sd$ = 0.015 seconds) but still in the order of less than 0.02 seconds.  
 
 For the memory footprint after saving a change made to the model, Hybrid NeoEMF ($mean$ = 2.64, $sd$ = 1.29 MBs) uses more memory than NeoEMF ($mean$ = 2.61, $sd$ = 0.78 MBs) but still at the insignificant level ($t$ = -0.14, $df$ = 34.67, $p$-value $=$ 0.89). Hybrid XMI ($mean$ = 1.56355, $sd$ = 0.0005 MBs) also uses more memory than XMI ($mean$ = 1.56326, $sd$ = 0.0018 MBs) when loading the model but also still at the insignificant level ($t$ = -0.76, $df$ = 23.8, $p$-value $=$ 0.46).  
+
+\subsubsection{BPMN2 Project}
+\label{sec:model_saving_time_bpmn2}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_time_bpmn2}
+    \caption{Hybrid vs. state-based model persistence on model saving time for the BPMN2 project.}
+    \label{fig:save_time_bpmn2}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_memory_bpmn2}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model for the BPMN2 project.}
+    \label{fig:save_memory_bpmn2}
+\end{figure}
+
+Using the same UML2 model version 192 of the BPMN2 project, the results shows that the average saving time for each change made to Hybrid NeoEMF ($mean$ = 0.0777, $sd$ = 0.0424 seconds) is slightly slower than the one made to NeoEMF ($mean$ = 0.0775, $sd$ = 0.0452 seconds) but insignificant ($t$ = -0.02, $df$ = 41.83, $p$-value = 0.99). The slowdown is more significant ($t$ = -23.85, $df$ = 39.93, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.33, $sd$ = 0.007 seconds) vs. XMI ($mean$ = 0.28, $sd$ = 0.008 seconds) but still in the order of less than 0.06 seconds.  
+
+For the memory footprint after saving a change made to the model, Hybrid NeoEMF ($mean$ = 1.86, $sd$ = 3.86 MBs) uses more memory than NeoEMF ($mean$ = 1.52, $sd$ = 0.77 MBs) but still at the insignificant level ($t$ = -0.4, $df$ = 22.66, $p$-value $=$ 0.69). Hybrid XMI ($mean$ = 0.8378, $sd$ = 0.00361 MBs) also uses more memory than XMI ($mean$ = 0.8375, $sd$ = 0.00362 MBs) when loading the model but also still at the insignificant level ($t$ = -0.22, $df$ = 42, $p$-value $=$ 0.83).  
+
+\subsubsection{Wikipedia Article}
+\label{sec:model_saving_time_wikipedia}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_time_wikipedia}
+    \caption{Hybrid vs. state-based model persistence on model saving time for the Wikipedia article.}
+    \label{fig:save_time_wikipedia}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=\linewidth]{images/save_memory_wikipedia}
+    \caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model for the Wikipedia article.}
+    \label{fig:save_memory_wikipedia}
+\end{figure}
+
+Using the same MoDiscoXML model version 10,187 of the Wikipedia's United States article, the results shows that the average saving time for each change made to Hybrid NeoEMF ($mean$ = 0.135, $sd$ = 0.048 seconds) is slightly slower than the one made to NeoEMF ($mean$ = 0.120, $sd$ = 0.024 seconds) but insignificant ($t$ = -1.33, $df$ = 30.71, $p$-value = 0.19). The slowdown is more significant ($t$ = -5.9, $df$ = 40.69, $p$-value $<$ 0.05) on Hybrid XMI ($mean$ = 0.024, $sd$ = 0.048 seconds) vs. XMI ($mean$ = 0.020, $sd$ = 0.002 seconds) but still in the order of less than 0.006 seconds.
+
+For the memory footprint after saving a change made to the model, Hybrid NeoEMF ($mean$ = 1.32, $sd$ = 1.51 MBs) uses more memory than NeoEMF ($mean$ = 0.97, $sd$ = 0.76 MBs) but still at the insignificant level ($t$ = -0.97, $df$ = 30.9, $p$-value $=$ 0.34). Hybrid XMI ($mean$ = 0.0010, $sd$ = 0.00044 MBs) also uses more memory than XMI ($mean$ = 0.0005, $sd$ = 0.00001 MBs) when loading the model and at the significant level ($t$ = -5.0, $df$ = 21.08, $p$-value $<$ 0.05).  
 
 \subsection{Storage Space Usage}
 \label{sec:storage_space_usage}
