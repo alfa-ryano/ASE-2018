@@ -289,7 +289,7 @@ In SBP only the final state of the model is persisted. Thus, to represent the fi
 
 %In change-based model persistence, instead of saving the state of the model, all the changes made to it are saved instead. Change events are collected in memory during model editing and are appended into a change-based log file when the model is saved. The changes made to the example model in both sessions can be seen in a text-based (for demonstration purposes), change-based format presented in List. \ref{lst:cbpmodel}. To load a model saved in a change-based representation, its persisted change events have to be replayed -- reenacting the construction of the model from the beginning.
 
-\begin{lstlisting}[style=eol,caption={The text change-based persistence of producing state-based model in List. \ref{lst:xmimodel2}. Its visual illustration is in Fig. \ref{fig:illustration_cbp}.},label=lst:cbpmodel]
+\begin{lstlisting}[style=eol,caption={The text change-based persistence of producing the state-based model in List. \ref{lst:xmimodel2}.},label=lst:cbpmodel]
 session 1
 create p1 of Package
 set p1.name to "X"  
@@ -379,8 +379,10 @@ We also created a resource class for hybrid persistence, the $HybridResource$ cl
 The resource implementation class for NeoEMF is the $HybridNeoEMFResourceImpl$ class, and $HybridXMIResource$$Impl$ class for XMI. Both are derived from the $HybridResource$. For $HybridNeoEMFResourceImpl$ , this class also implements the NeoEMF's $PersistenceResource$ interface \cite{atlanmod2018persistentResource} so that specific NeoEMF's methods can also be implemented on this hybrid implementation class (e.g. $close$() method to close a connection with a backend database). The complete implementation is available under \url{https://github.com/epsilonlabs/emf-cbp}.
 
 \subsection{Known Limitations}
+%\dk{TODO: Discuss subset of Ecore covered, only support for single-file models, no support for detection should the state-based and change-based representations fall out of sync etc.}
+In this section, we present the known limitations of the hybrid model persistence. The hybrid model persistence is built upon the Eclipse Modeling Framework. Thus, the change-based component can support persisting information about the subsets of Ecore, such as classes, single and multi-valued features (attributes and references), datatypes, and containment. The change-based component supports persisting changes of models in the form of atomic events, such as creating and deleting an object, setting and unsetting a feature, moving a value or object within a multi-valued feature, removing and adding a value or object from and to a feature, and session (a course from starting editing a model, or after performing previous saving, to saving the model). 
 
-\dk{TODO: Discuss subset of Ecore covered, only support for single-file models, no support for detection should the state-based and change-based representations fall out of sync etc.}
+Moreover, the hybrid model persistence only supports single-file models; it cannot handle models persisted in multiple files/backends. It means that it can only persist changes from one state-based representation to a single change-based representation. The hybrid model persistence does not have support for detection in case the state-based and change-based representation fall out. 
 
 \section{Evaluation}
 \label{sec:evaluation}
