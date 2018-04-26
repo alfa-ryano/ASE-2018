@@ -446,9 +446,10 @@ In this section, we present the results of our evaluation on the time and memory
 
 The model used for testing is the UML2 model of the Epsilon project that consists of 88,020 elements. The model is derived from the committed version number 940 from its Git repository \cite{eclipse2018epsilongit}. 
 
-The results show that the average loading time using Hybrid NeoEMF ($mean$ = 0.292, $sd$ = 0.061 seconds) is slightly slower than NeoEMF ($mean$ = 0.279, $sd$ = 0.023 seconds) but insignificant ($W$ = 258, $p$-value = 0.72). For Hybrid XMI, the slowdown is significant ($W$ = 0, $p$-value $<$ 0.05), hybrid XMI taking  ($mean$ = 0.873, $sd$ = 0.038 seconds), compared to XMI ($mean$ = 0.616, $sd$ = 0.015 seconds).  %F: took out the average slowdown, as it is  meaningless unless expressed relative to the time taken... 0.3 sec on a mean of 0.6 secions is a 50% slowdown! 
+The results show that the average loading time using Hybrid NeoEMF ($mean$ = 0.292, $sd$ = 0.061 seconds) is slightly slower than NeoEMF ($mean$ = 0.279, $sd$ = 0.023 seconds) but insignificant ($W$ = 258, $p$-value = 0.72). For Hybrid XMI, the slowdown is significant ($W$ = 26, $p$-value $<$ 0.05), hybrid XMI taking  ($mean$ = 0.=317, $sd$ = 0.006 seconds), compared to XMI ($mean$ = 0.270, $sd$ = 0.018 seconds). As a reference, we also measured the time required for the optimised CBP loading approach in \cite{yohannis2018towards} to load the same model. The time required to load the model is $mean$ = 16.96, $sd$ = 1.26 seconds, which is clearly outperformed by other persistence approaches (see Table \ref{table:space_usage_epsilon} for the number of events contained by the CBP).
+ %F: took out the average slowdown, as it is  meaningless unless expressed relative to the time taken... 0.3 sec on a mean of 0.6 secions is a 50% slowdown! 
 
-The memory footprint after loading the model for Hybrid NeoEMF ($mean$ = 39, $sd$ = 0.9 MBs) is larger than for NeoEMF ($W$ = 0, $sd$ = 1.1 MBs); the result is statistically significant ($W$ = 0, $p$-value $<$ 0.05). A similarly significant increase of the memory footprint ($W$ = 0, $p$-value $<$ 0.05) is found when comparing Hybrid XMI ($mean$ = 12.8, $sd$ = 0.0 MBs) and XMI ($mean$ = 5.2, $sd$ = 0.0 MBs) when loading the model.  
+The memory footprint after loading the model for Hybrid NeoEMF ($mean$ = 38.601, $sd$ = 0.878 MBs) is larger than for NeoEMF ($mean$ = 10.014, $sd$ = 1.088 MBs); the result is statistically significant ($W$ = 0, $p$-value $<$ 0.05). A similarly significant increase of the memory footprint ($W$ = 0, $p$-value $<$ 0.05) is found when comparing Hybrid XMI ($mean$ = 10.72018, $sd$ = 0.00022 MBs) and XMI ($mean$ = 10.72009, $sd$ = 0.00024 MBs) when loading the model.   
 
 \begin{figure}[ht]
 \includegraphics[width=\linewidth]{images/load_time_bpmn2}
@@ -469,7 +470,9 @@ The memory footprint after loading the model for Hybrid NeoEMF ($mean$ = 39, $sd
 
 The UML2 model of the BPMN2 project consists of 62,062 elements. The model is derived from the committed version number 192 from its Git repository \cite{eclipse2018bpmn2git}. 
 
-For this model, the average loading time for Hybrid NeoEMF ($mean$ = 0.308, $sd$ = 0.071 seconds) is slightly slower than for NeoEMF ($mean$ = 0.286, $sd$ = 0.025 seconds) but the result is not  significant ($W$ = 230, $p$-value = 0.79). The slowdown is statistically significant ($W$ = 37, $p$-value $<$ 0.05) for Hybrid XMI ($mean$ = 0.212, $sd$ = 0.016 seconds) vs.compared to XMI ($mean$ = 0.179, $sd$ = 0.016 seconds).  %F: as above!!
+For this model, the average loading time for Hybrid NeoEMF ($mean$ = 0.308, $sd$ = 0.071 seconds) is slightly slower than for NeoEMF ($mean$ = 0.286, $sd$ = 0.025 seconds) but the result is not  significant ($W$ = 230, $p$-value = 0.79). The slowdown is statistically significant ($W$ = 37, $p$-value $<$ 0.05) for Hybrid XMI ($mean$ = 0.212, $sd$ = 0.016 seconds) vs.compared to XMI ($mean$ = 0.179, $sd$ = 0.016 seconds). As a reference, the optimised CBP \cite{yohannis2018towards} takes $mean$ = 3.97, $sd$ = 0.02 seconds to load the model, which is slower than any other persistence  approaches (see Table \ref{table:space_usage_bpmn2} for the number of events contained by the CBP). 
+
+%F: as above!!
 
 For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 40.78, $sd$ = 1.29 MBs) uses more memory than NeoEMF ($mean$ = 27.20, $sd$ = 1.05 MBs); the result is statistically significant ($W$ = 0, $p$-value $<$ 0.05). For the comparison between Hybrid XMI ($mean$ = 6.73374, $sd$ = 1.29305 MBs) and XMI ($mean$ = 6.73367, $sd$ = 0.00056 MBs), the increase of memory footprint is also significant ($W$ = 101, $p$-value $<$ 0.05).  
 
@@ -491,9 +494,9 @@ For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 40.78,
 
 The ModiscoXML model of the Wikipedia's United States article consists of 13,122 elements. The model is derived from the version number 10,187 (id 45118452) of its online page \cite{wikipedia2018us}. 
 
-For this model, the average loading time of Hybrid NeoEMF ($mean$ = 0.287, $sd$ = 0.028 seconds) is slightly slower than NeoEMF ($mean$ = 0.275, $sd$ = 0.001 seconds) and significant ($W$ = 129, $p$-value $<$ 0.05), but the slowdown is only at the level of 4.36\%. The slowdown on Hybrid XMI ($mean$ = 0.045, $sd$ = 0.001 seconds) compared to XMI ($mean$ = 0.040, $sd$ = 0.001 seconds) is not significant ($W$ = 0, $p$-value $<$ 0.05).  
+For this model, the average loading time of Hybrid NeoEMF ($mean$ = 0.262, $sd$ = 0.048 seconds) is slightly faster than NeoEMF ($mean$ = 0.273, $sd$ = 0.062 seconds) but insignificant ($W$ = 250, $p$-value $<$ 0.86). The slowdown on Hybrid XMI ($mean$ = 0.045, $sd$ = 0.001 seconds) compared to XMI ($mean$ = 0.040, $sd$ = 0.001 seconds) is also significant ($W$ = 0, $p$-value $<$ 0.05). As a reference, the optimised CBP \cite{yohannis2018towards} requires $mean$ = 235.66, $sd$ = 9.96 seconds to load the model, which is very slow compared to other persistence approach (see Table \ref{table:space_usage_wikipedia} for the number of events contained by the CBP). 
 
-For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 35.91, $sd$ = 1.03 MBs) uses more memory than NeoEMF ($mean$ = 27.25, $sd$ = 0.54 MBs); the difference is not statistically significant ($W$ = 0, $df$ = $p$-value $<$ 0.05). A insignificant difference ($W$ = 0, $p$-value $<$ 0.05)  is also found when comparing the memory footprint for Hybrid XMI ($mean$ = 8.4079, $sd$ = 0.0008 MBs) vs. XMI ($mean$ = 8.0933, $sd$ = 0.0009 MBs).  
+For the memory footprint after loading the model, Hybrid NeoEMF ($mean$ = 35.91, $sd$ = 1.03 MBs) uses more memory than NeoEMF ($mean$ = 27.25, $sd$ = 0.54 MBs); the difference is statistically significant ($W$ = 0, $df$ = $p$-value $<$ 0.05). A significant difference ($W$ = 0, $p$-value $<$ 0.05)  is also found when comparing the memory footprint for Hybrid XMI ($mean$ = 8.4079, $sd$ = 0.0008 MBs) vs. XMI ($mean$ = 8.0933, $sd$ = 0.0009 MBs).  
 
 \subsection{Model Saving Time and Memory Footprint}
 \label{sec:model_saving_time}
@@ -505,13 +508,13 @@ In this section, we evaluated the time taken to save a changed model using hybri
 
 \begin{figure}[ht]
 \includegraphics[width=\linewidth]{images/save_time_epsilon}
-\caption{Hybrid vs. state-based model persistence on model saving time.}
+\caption{Hybrid vs. state-based model persistence on model saving time for the Epsilon project.}
 \label{fig:save_time_epsilon}
 \end{figure}
 
 \begin{figure}[ht]
 \includegraphics[width=\linewidth]{images/save_memory_epsilon}
-\caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model.}
+\caption{Hybrid vs. state-based model persistence on the memory footprint of saving a model for the Epsilon project.}
 \label{fig:save_memory_epsilon}
 \end{figure}
 
