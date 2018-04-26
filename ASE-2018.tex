@@ -133,12 +133,18 @@ UnsetEReferenceEvent,
 % author names and affiliations
 % use a multiple column layout for up to three different
 % affiliations\ref{abstract}
-\author{\IEEEauthorblockN{Alfa Yohannis\IEEEauthorrefmark{1}, Horacio Hoyos Rodriguez\IEEEauthorrefmark{2}, Fiona Polack\IEEEauthorrefmark{3}, Dimitris Kolovos\IEEEauthorrefmark{4}}
-\IEEEauthorblockA{
-\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}\IEEEauthorrefmark{4}Department of Computer Science, University of York, United Kingdom \\
-\IEEEauthorrefmark{3}School of Computing and Maths, Keele University, United Kingdom \\
-Email: \IEEEauthorrefmark{1}ary506@york.ac.uk, \IEEEauthorrefmark{2}horacio\_hoyos\_rodriguez@ieee.org, \\
-\IEEEauthorrefmark{3}f.a.c.polack@keele.ac.uk, \IEEEauthorrefmark{4}dimitris.kolovos@york.ac.uk}}
+
+
+\author{[Hidden for Blind Review]}
+
+%\author{\IEEEauthorblockN{Alfa Yohannis\IEEEauthorrefmark{1}, Horacio Hoyos Rodriguez\IEEEauthorrefmark{2}, Fiona Polack\IEEEauthorrefmark{3}, Dimitris Kolovos\IEEEauthorrefmark{4}}
+%\IEEEauthorblockA{
+%\IEEEauthorrefmark{1}\IEEEauthorrefmark{2}\IEEEauthorrefmark{4}Department of Computer Science, University of York, United Kingdom \\
+%\IEEEauthorrefmark{3}School of Computing and Maths, Keele University, United Kingdom \\
+%Email: \IEEEauthorrefmark{1}ary506@york.ac.uk, \IEEEauthorrefmark{2}horacio\_hoyos\_rodriguez@ieee.org, \\
+%\IEEEauthorrefmark{3}f.a.c.polack@keele.ac.uk, \IEEEauthorrefmark{4}dimitris.kolovos@york.ac.uk}}
+
+
 
 % conference papers do not typically use \thanks and this command
 % is locked out in conference mode. If really needed, such as for
@@ -382,7 +388,7 @@ The Epsilon CBP provides a $ChangeEventAdapter$ class \cite{DBLP:conf/models/Yoh
 
 We also created a resource class for hybrid persistence, $HybridResource$ (a resource class is a class dedicated to interact with a persistence, e.g. save, load, get contents), derived from the Ecore's $ResourceImpl$ \cite{eclipse2018resourceImpl}. The class is again abstract so that it can be realised in different resource implementation classes for different state-based persistence. The $HybridResource$ class contains the $stateBasedResource$ field which is used to refer to a state-based persistence that is being used, and the $cbpOutputStream$ field that refers to an $OutputStream$ (e.g. file, in-memory) as the representation of the change-based persistence for saving changes. $HybridResource$ has an association with $HybridChangeEventAdapater$, so that the former can access the events collected by the latter, and the latter can also use facilities provided by the former (e.g. getting an element identity in the resource; saving changes to a change-based model representation).
 
-The resource implementation classes for NeoEMF and XMI are $HybridNeoEMFResourceImpl$ and $HybridXMIResource$$Impl$, respectively.  $HybridNeoEMFResourceImpl$ also implements the NeoEMF's $PersistenceResource$ interface \cite{atlanmod2018persistentResource} so that specific NeoEMF's methods can used (e.g. $close$(), to close a connection with a backend database). The complete implementation is available under \url{https://github.com/epsilonlabs/emf-cbp}.
+The resource implementation classes for NeoEMF and XMI are $HybridNeoEMFResourceImpl$ and $HybridXMIResource$$Impl$, respectively.  $HybridNeoEMFResourceImpl$ also implements the NeoEMF's $PersistenceResource$ interface \cite{atlanmod2018persistentResource} so that specific NeoEMF's methods can used (e.g. $close$(), to close a connection with a backend database). The complete implementation is available under [Hidden for Blind Review]. %\url{https://github.com/epsilonlabs/emf-cbp}.
 
 \subsection{Known Limitations}
 
@@ -762,7 +768,8 @@ In the future, we plan to evaluate  hybrid model persistence on even larger mode
 
 % use section\\ for acknowledgment
 \section*{Acknowledgment}
-This research is part of a doctoral programme funded by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
+[Hidden for Blind Review]
+%This research is part of a doctoral programme funded by \emph{Lembaga Pengelola Dana Pendidikan Indonesia} (Indonesia Endowment Fund for Education).
 
 % trigger a \newpage just before the given reference
 % number - used to balance the columns on the last page
